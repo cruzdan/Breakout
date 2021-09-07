@@ -17,7 +17,6 @@ extern SDL_Rect pauseRects[];
 extern SDL_Rect musicVolumeRect[];
 extern SDL_Rect soundVolumeRect[];
 
-//assign the coordinates, width and height on the middle of the menuX
 void assignProperties(SDL_Rect* rect, int y, int w, int h);
 void writeGameMenu(SDL_Renderer* renderer);
 void closeMenu();

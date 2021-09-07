@@ -7,38 +7,84 @@
 #include "Brick.h"
 #include "GlobalVariables.h"
 #include "Paddle.h"
+#include "Capsule.h"
 
-int ballSpeedX;
-int ballSpeedY;
-int ballSpeedChange;
-int maxBallSpeed;
-int lastBrickY;
+//rect is the ball or the bullet
+bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
+	int posX, posY, pos;
+	posX = rect.x / (brick.w + freeSizeX);
+	posY = (rect.y - initialBrickY) / (brick.h + freeSizeY);
+	pos = posX + posY * totalRectanglesX;
 
-//set the ball speed when the size screen changes
-void setNewBallSpeedWindow(int percentageX) {
-	ballSpeedX = (percentageX * SCREEN_WIDTH) / 100;
-}
-
-//get the coordinates in percentage of the screen of the rect(center)
-void getLastBallSpeed(int* speedX) {
-	*speedX = 100 * ballSpeedX / SCREEN_WIDTH;
-	if (*speedX == 0) {
-		if (ballSpeedX > 0)
-			*speedX = 1;
-		else
-			*speedX = -1;
+	if (brickStatus[pos] && SDL_HasIntersection(&rect, &rectangles[pos])) {
+		*position = pos;
+		return true;
 	}
+
+	posX = (rect.x + rect.w) / (brick.w + freeSizeX);
+	posY = (rect.y - initialBrickY) / (brick.h + freeSizeY);
+	pos = posX + posY * totalRectanglesX;
+
+	if (brickStatus[pos] && SDL_HasIntersection(&rect, &rectangles[pos])) {
+		*position = pos;
+		return true;
+	}
+
+	posX = rect.x / (brick.w + freeSizeX);
+	posY = (rect.y + rect.h - initialBrickY) / (brick.h + freeSizeY);
+	pos = posX + posY * totalRectanglesX;
+
+	if (brickStatus[pos] && SDL_HasIntersection(&rect, &rectangles[pos])) {
+		*position = pos;
+		return true;
+	}
+
+	posX = (rect.x + rect.w) / (brick.w + freeSizeX);
+	posY = (rect.y + rect.h - initialBrickY) / (brick.h + freeSizeY);
+	pos = posX + posY * totalRectanglesX;
+
+	if (brickStatus[pos] && SDL_HasIntersection(&rect, &rectangles[pos])) {
+		*position = pos;
+		return true;
+	}
+	return false;
 }
 
-void initUpdateVariables() {
-	ballSpeedX = SCREEN_WIDTH / 98;
-	ballSpeedY = -SCREEN_HEIGHT / 72;
-	ballSpeedChange = ballSpeedX / 2;
-	maxBallSpeed = ballSpeedChange * 4;
-	lastBrickY = SCREEN_HEIGHT / 2 - freeSizeY;
+//rect is the ball or the bullet
+bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball) {
+	//detect the collision of the ball with the bricks
+	if (rect.y <= lastBrickY && rect.y + rect.h >= rectangles[0].y) {
+		int pos = 0;
+		if (checkRectCollisionBrick(rect, &pos)) {
+
+			checkBrickWithCapsule(pos);
+
+			Mix_PlayChannel(1, sound, 0);
+			brickStatus[pos] = false;
+			score++;
+			writeScore(renderer);
+			if (score % totalRectangles == 0) {
+				level++;
+				writeLevel(renderer);
+				centerPaddle();
+				centerBall();
+				activateBricks();
+				restartCapsules();
+				restartBullets();
+				initCapsules(1 + rand() % totalRectangles, totalRectangles);
+				ballSpeedY = -abs(ballSpeedY);
+				timer = 0;
+				serve = true;
+			}
+			if (ball)
+				changeBallMovementWithBrick(rect, rectangles[pos]);
+			return true;
+		}
+	}
+	return false;
 }
 
-void update(SDL_Renderer* renderer) {
+void update(SDL_Renderer* renderer, int time) {
 	int xI = ballRect.x + ballSpeedX;
 	int xF = xI + ballRect.w;
 	int yI = ballRect.y + ballSpeedY;
@@ -55,12 +101,16 @@ void update(SDL_Renderer* renderer) {
 		lifes--;
 		if (lifes == 0) {
 			restart(renderer);
+			return;
 		}
 		else {
 			writeLife(renderer);
 			centerPaddle();
 			centerBall();
 			serve = true;
+			restartCapsules();
+			restartBullets();
+			return;
 		}
 
 	}
@@ -78,79 +128,8 @@ void update(SDL_Renderer* renderer) {
 	ballRect.x += ballSpeedX;
 	ballRect.y += ballSpeedY;
 
-
-	//detect the collision of the ball with the bricks
-	if (ballRect.y <= lastBrickY) {
-		int positionBrickX;
-		int positionBrickY;
-		int pos;
-
-		positionBrickX = ballRect.x / (brick.w + freeSizeX);
-		positionBrickY = ballRect.y / (brick.h + freeSizeY);
-		pos = positionBrickX + positionBrickY * totalRectanglesX;
-
-		SDL_Rect auxiliarBrick;
-		auxiliarBrick = rectangles[pos];
-
-		if (brickStatus[pos] && SDL_HasIntersection(&ballRect, &auxiliarBrick)) {
-			Mix_PlayChannel(1, sound, 0);
-			brickStatus[pos] = false;
-			score++;
-			writeScore(renderer);
-			if (score % totalRectangles == 0) {
-				level++;
-				writeLevel(renderer);
-				centerPaddle();
-				centerBall();
-				activateBricks();
-			}
-			if (ballSpeedY > 0 && ballRect.y < auxiliarBrick.y) {
-				ballSpeedY = -ballSpeedY;
-			}
-			else if (ballRect.y + ballRect.h > auxiliarBrick.y + auxiliarBrick.h) {
-				ballSpeedY = -ballSpeedY;
-			}
-			else if (ballSpeedX > 0 && ballRect.x < auxiliarBrick.x) {
-				ballSpeedX = -ballSpeedX;
-			}
-			else if (ballRect.x + ballRect.w > auxiliarBrick.x + auxiliarBrick.w) {
-				ballSpeedX = -ballSpeedX;
-			}
-		}
-	}
+	checkRectCollisionBricks(ballRect, renderer, true);
 	updatePaddle();
-}
-
-void incrementBallSpeedX() {
-	if (ballSpeedX > 0)
-		ballSpeedX += ballSpeedChange;
-	else
-		ballSpeedX -= ballSpeedChange;
-}
-
-void incrementBallSpeedY() {
-	int incrementY = SCREEN_HEIGHT / 72;
-	if (ballSpeedY > 0)
-		ballSpeedY += incrementY;
-	else
-		ballSpeedY -= incrementY;
-}
-
-void decrementBallSpeedX() {
-	if (ballSpeedX > 0) {
-		if (ballSpeedX - ballSpeedChange > 0)
-			ballSpeedX -= ballSpeedChange;
-	}
-	else if (ballSpeedX + ballSpeedChange < 0)
-		ballSpeedX += ballSpeedChange;
-}
-
-void decrementBallSpeedY() {
-	int incrementY = SCREEN_HEIGHT / 72;
-	if (ballSpeedY > 0) {
-		if(ballSpeedY - incrementY > 0)
-			ballSpeedY -= incrementY;
-	}
-	else if(ballSpeedY + incrementY < 0)
-		ballSpeedY += incrementY;
+	updateCapsules();
+	updateBullets(renderer, time);
 }

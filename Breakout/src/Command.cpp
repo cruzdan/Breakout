@@ -5,7 +5,7 @@
 #include "FPS.h"
 #include "Menu.h"
 #include "Paddle.h"
-#include "Update.h"
+#include "Ball.h"
 
 //command line
 bool commandLine = false;

@@ -10,6 +10,7 @@
 #include "Brick.h"
 #include "Update.h"
 #include "Command.h"
+#include "Capsule.h"
 
 bool init(SDL_Window** window, SDL_Renderer** renderer) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -53,6 +54,6 @@ void initVariables() {
 	initBall();
 	initBrickVariables();
 	createRectangles();
-	initUpdateVariables();
 	initCommandLine();
+	initCapsuleVariables();
 }

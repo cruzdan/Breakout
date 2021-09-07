@@ -245,12 +245,13 @@ xcopy /y /d $(SolutionDir)thirdparty\SDL\lib\x64\zlib1.dll $(OutDir)
   <ItemGroup>
     <ClCompile Include="src\Ball.cpp" />
     <ClCompile Include="src\Brick.cpp" />
+    <ClCompile Include="src\Capsule.cpp" />
     <ClCompile Include="src\Close.cpp" />
     <ClCompile Include="src\Command.cpp" />
     <ClCompile Include="src\FPS.cpp" />
     <ClCompile Include="src\GlobalVariables.cpp" />
+    <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\Init.cpp" />
-    <ClCompile Include="src\Joystick.cpp" />
     <ClCompile Include="src\Key.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Menu.cpp" />
@@ -264,12 +265,13 @@ xcopy /y /d $(SolutionDir)thirdparty\SDL\lib\x64\zlib1.dll $(OutDir)
     <ClInclude Include="GlobalVariables.h" />
     <ClInclude Include="src\Ball.h" />
     <ClInclude Include="src\Brick.h" />
+    <ClInclude Include="src\Capsule.h" />
     <ClInclude Include="src\Close.h" />
     <ClInclude Include="src\Command.h" />
     <ClInclude Include="src\FPS.h" />
     <ClInclude Include="src\GlobalVariables.h" />
+    <ClInclude Include="src\Image.h" />
     <ClInclude Include="src\Init.h" />
-    <ClInclude Include="src\Joystick.h" />
     <ClInclude Include="src\Key.h" />
     <ClInclude Include="src\Menu.h" />
     <ClInclude Include="src\Music.h" />

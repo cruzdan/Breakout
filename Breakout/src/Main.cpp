@@ -1,7 +1,6 @@
 #include <SDL.h>
 #include "Menu.h"
 #include "Ball.h"
-#include "Joystick.h"
 #include "Music.h"
 #include "Init.h"
 #include "Key.h"
@@ -11,6 +10,8 @@
 #include "Brick.h"
 #include "FPS.h"
 #include "Paddle.h"
+#include "Image.h"
+#include "Capsule.h"
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -19,19 +20,22 @@ int main(int argc, char* args[]) {
 	if (!init(&window, &renderer))
 		return -1;
 	loadMusic();
-	loadImage(renderer);
+	loadImage(renderer, &ballImage, &ballTexture, "images/ball1.png");
+	initRandom();
 	initVariables();
 	activateBricks();
-	loadJoystick();
 	writeGameMenu(renderer);
 	writePauseMenu(renderer);
+	initCapsules(1 + rand() % totalRectangles, totalRectangles);
 	Mix_PlayMusic(music, -1);
+
+
 	const int frameDelay = 1000 / 60;
 	while (!gameOver) {
 		beforeFPS();
 		if (menuIndex == 0) {
 			if (!serve) {
-				update(renderer);
+				update(renderer, frameDelay);
 			}
 			else {
 				start(frameDelay);
@@ -39,8 +43,6 @@ int main(int argc, char* args[]) {
 				updatePaddle();
 			}
 			detectGameKey(renderer);
-			if (totalJoysticks > 0)
-				detectKeyJoystick();
 		}
 		else {
 			detectPauseKey(renderer);

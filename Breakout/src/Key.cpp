@@ -6,6 +6,7 @@
 #include "Ball.h"
 #include "Update.h"
 #include "Command.h"
+#include "Capsule.h"
 
 bool gameOver = false;
 
@@ -31,18 +32,34 @@ void generalKey(SDL_Event event, SDL_Renderer* renderer) {
 	}
 	else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
 		//change the window size
-		int paddleX, speedPaddleX;
+		int paddleX, paddleMultiplicator;
 		int ballX, ballY;
-		int speedX;
+		int ballMultiplicator;
 		getActualPadddleCoordinates(&paddleX);
 		getActualRectCoordinates(&ballX, &ballY, ballRect);
-		getLastBallSpeed(&speedX);
-		getActualPaddleSpeed(&speedPaddleX);
+		ballMultiplicator = getMultiplicatorBallSpeed();
+		paddleMultiplicator = getMultiplicatorPaddleSpeed();
+		SDL_Point* capsulePercentages = new SDL_Point[actualCapsules];
+		capsulePercentages = getActualCapsulePercentages(capsulePercentages);
+		SDL_Point* bulletPercentages = new SDL_Point[actualBullets];
+		bulletPercentages = getActualBulletPercentages(bulletPercentages);
+
 		changeWindowGameSize(renderer);
+
 		setWindowPaddleCoordinates(paddleX);
 		ballRect = setWindowRectCoordinates(ballX, ballY, ballRect);
-		setNewBallSpeedWindow(speedX);
-		setPaddleSpeed(speedPaddleX);
+		setMultiplicatorBallSpeed(ballMultiplicator);
+		setMultiplicatorPaddleSpeed(paddleMultiplicator);
+		resizeCapsules(); 
+		for (int i = 0; i < actualCapsules; i++) {
+			capsules[i].rect = setWindowRectCoordinates(capsulePercentages[i].x, capsulePercentages[i].y, capsules[i].rect);
+		}
+		delete[] capsulePercentages;
+		resizeBullets();
+		for (int i = 0; i < actualBullets; i++) {
+			bullets[i] = setWindowRectCoordinates(bulletPercentages[i].x, bulletPercentages[i].y, bullets[i]);
+		}
+		delete[] bulletPercentages;
 	}
 }
 
@@ -72,6 +89,10 @@ void detectGameKey(SDL_Renderer* renderer) {
 	}
 	if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT]) {
 		movePaddleRight();
+	}
+	
+	if (keys[SDL_SCANCODE_F]) {
+		shoot();
 	}
 	if (keys[SDL_SCANCODE_R]) {
 		restart(renderer);
@@ -135,18 +156,17 @@ void detectPauseKey(SDL_Renderer* renderer) {
 						soundOnOff(renderer);
 						break;
 					case 3:
-						//fullscreen
 						int paddleX;
 						int ballX, ballY;
-						int speedX;
+						int ballMultiplicator;
 						getActualPadddleCoordinates(&paddleX);
 						getActualRectCoordinates(&ballX, &ballY, ballRect);
-						getLastBallSpeed(&speedX);
+						ballMultiplicator = getMultiplicatorBallSpeed();
 						fullscreenOnOff(renderer);
 						changeFullscreenGameSize(renderer);
 						setWindowPaddleCoordinates(paddleX);
 						ballRect = setWindowRectCoordinates(ballX, ballY, ballRect);
-						setNewBallSpeedWindow(speedX);
+						setMultiplicatorBallSpeed(ballMultiplicator);
 						break;
 					}
 					break;

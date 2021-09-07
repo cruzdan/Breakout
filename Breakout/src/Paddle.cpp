@@ -27,7 +27,7 @@ void updatePaddle() {
 	if (paddleSpeed > 0) {
 		if (paddle.x + paddle.w + paddleSpeed <= boardWidth) {
 			paddle.x += paddleSpeed;
-			//doww speed
+			//doww paddle speed
 			paddleSpeed -= changeSpeed / 2;
 		}
 		else
@@ -48,7 +48,7 @@ void initPaddle() {
 	maxSpeed = (SCREEN_WIDTH / 72) * 5;
 	changeSpeed = SCREEN_WIDTH / 288;
 
-	paddle.w = boardWidth / 4;
+	paddle.w = boardWidth / 5;
 	paddle.h = SCREEN_HEIGHT / 60;
 	paddle.x = boardWidth / 2 - paddle.w / 2;
 	paddle.y = int(SCREEN_HEIGHT * 0.9);
@@ -65,14 +65,14 @@ void getActualPadddleCoordinates(int* x) {
 	*x = 100 * centerRectX / SCREEN_WIDTH;
 }
 
-//get the speed in percentage of the screen width
-void getActualPaddleSpeed(int* speed) {
-	*speed = paddleSpeed * 100 / SCREEN_WIDTH;
+//get the actual paddle speed in termns of changeSpeed
+int getMultiplicatorPaddleSpeed() {
+	return (paddleSpeed / changeSpeed);
 }
 
-//set the paddle speed with the width percentage of the window
-void setPaddleSpeed(int percentageX) {
-	paddleSpeed = (percentageX / 100) * SCREEN_WIDTH;
+//set the paddle speed in a multiplicator of changeSpeed
+void setMultiplicatorPaddleSpeed(int paddleMultiplicator) {
+	paddleSpeed = paddleMultiplicator * changeSpeed;
 }
 
 void incrementPaddleSpeed() {

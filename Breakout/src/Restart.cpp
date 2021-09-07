@@ -5,6 +5,7 @@
 #include "Update.h"
 #include "GlobalVariables.h"
 #include "Paddle.h"
+#include "Capsule.h"
 
 void restart(SDL_Renderer* renderer) {
 	paddleSpeed = 0;
@@ -19,5 +20,8 @@ void restart(SDL_Renderer* renderer) {
 	centerPaddle();
 	centerBall();
 	serve = true;
-	ballSpeedY = -SCREEN_WIDTH / 98;
+	ballSpeedY = -SCREEN_HEIGHT / 72;
+	restartCapsules();
+	restartBullets();
+	initCapsules(1 + rand() % totalRectangles, totalRectangles);
 }

@@ -11,5 +11,5 @@ void getActualPadddleCoordinates(int* x);
 void incrementPaddleSpeed();
 void decrementPaddleSpeed();
 void updatePaddle();
-void getActualPaddleSpeed(int* speed);
-void setPaddleSpeed(int percentageX);
+int getMultiplicatorPaddleSpeed();
+void setMultiplicatorPaddleSpeed(int paddleMultiplicator);

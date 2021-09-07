@@ -3,9 +3,9 @@
 #include <SDL_image.h>
 #include "Ball.h"
 #include "Menu.h"
-#include "Joystick.h"
 #include "Music.h"
 #include "Command.h"
+#include "Capsule.h"
 
 void closeTextures() {
 	closeTextureBall();
@@ -15,13 +15,13 @@ void closeTextures() {
 }
 
 void close(SDL_Window* window, SDL_Renderer* renderer) {
-	closeJoystick();
 	closeTextures();
 	closeMusic();
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
+	closeCapsule();
 	Mix_Quit();
 	TTF_Quit();
 	IMG_Quit();
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 }

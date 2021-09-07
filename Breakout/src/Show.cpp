@@ -5,6 +5,7 @@
 #include "Ball.h"
 #include "Brick.h"
 #include "Command.h"
+#include "Capsule.h"
 
 void show(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -18,8 +19,11 @@ void show(SDL_Renderer* renderer) {
 			SDL_RenderCopy(renderer, textStart, NULL, &startRect);
 		}
 		else {
-			SDL_RenderCopy(renderer, ballTexture, &ballImageRect, &ballRect);
+			SDL_RenderCopy(renderer, ballTexture, NULL, &ballRect);
 			showBricks();
+			
+			showCapsules(renderer);
+			showBullets(renderer);
 		}
 	}
 	else {

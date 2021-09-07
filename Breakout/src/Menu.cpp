@@ -51,6 +51,7 @@ SDL_Rect startRect;
 bool serve = true;
 int timer = 0;
 
+//assign the coordinates, width and height on the middle of the menuX
 void assignProperties(SDL_Rect* rect, int y, int w, int h) {
 	rect->y = y;
 	rect->w = w;
@@ -205,7 +206,6 @@ void showPauseMenu(SDL_Renderer* renderer) {
 			SDL_RenderFillRect(renderer, &soundVolumeRect[i]);
 		}
 	}
-	
 }
 
 void start(int time) {
@@ -217,7 +217,7 @@ void start(int time) {
 }
 
 void countStart(SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-Stencil.ttf", SCREEN_HEIGHT / 15);
+	TTF_Font* font = TTF_OpenFont("fonts/Oswald-Stencil.ttf", SCREEN_HEIGHT / 15);;
 	SDL_Surface* textSurface;
 	char c[4];
 	int m = timer / 1000 + 1;
