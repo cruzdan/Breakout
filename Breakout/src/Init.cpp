@@ -48,12 +48,12 @@ bool init(SDL_Window** window, SDL_Renderer** renderer) {
 	return true;
 }
 
-void initVariables() {
+void initVariables(SDL_Renderer* renderer) {
 	initMenu();
 	initPaddle();
 	initBall();
 	initBrickVariables();
 	createRectangles();
 	initCommandLine();
-	initCapsuleVariables();
+	initCapsuleVariables(renderer);
 }

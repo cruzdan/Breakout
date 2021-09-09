@@ -4,6 +4,7 @@
 #include "Music.h"
 #include "Init.h"
 #include "Command.h"
+#include "Capsule.h"
 
 //board
 int boardWidth;
@@ -161,6 +162,9 @@ void showGameMenu(SDL_Renderer* renderer) {
 	SDL_RenderCopy(renderer, textLives, NULL, &textLivesRect);
 	SDL_RenderCopy(renderer, textLifeNumber, NULL, &textLifeNumberRect);
 	SDL_RenderCopy(renderer, textRestart, NULL, &textRestartRect);
+	if (paddleShoot) {
+		showTextScore(renderer);
+	}
 }
 
 void showPauseMenu(SDL_Renderer* renderer) {
@@ -217,7 +221,7 @@ void start(int time) {
 }
 
 void countStart(SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-Stencil.ttf", SCREEN_HEIGHT / 15);;
+	TTF_Font* font = TTF_OpenFont("fonts/Oswald-Stencil.ttf", SCREEN_HEIGHT / 15);
 	SDL_Surface* textSurface;
 	char c[4];
 	int m = timer / 1000 + 1;
@@ -290,6 +294,9 @@ void initMenu() {
 		textLivesRect.h, textPuntuationRect.w, spaceY);
 	assignProperties(&textRestartRect, textLifeNumberRect.y +
 		textLifeNumberRect.h, menuWidth, spaceY);
+
+	assignProperties(&textShootTimerRect, textRestartRect.y +
+		textRestartRect.h, menuWidth, spaceY);
 
 	spaceY = SCREEN_HEIGHT / 20;
 	pauseRects[0].x = SCREEN_WIDTH / 3;
@@ -426,7 +433,7 @@ void changeWindowGameSize(SDL_Renderer* renderer) {
 	SDL_GetWindowSize(window, &screenWidth, &screenHeight);
 	setScreenWidth(screenWidth);
 	setScreenHeight(screenHeight);
-	initVariables();
+	initVariables(renderer);
 	writeGameMenu(renderer);
 	writePauseMenu(renderer);
 	countStart(renderer);
@@ -448,7 +455,7 @@ void changeFullscreenGameSize(SDL_Renderer* renderer) {
 		SDL_SetWindowSize(window, Width, Height);
 		setScreenWidth(Width);
 		setScreenHeight(Height);
-		initVariables();
+		initVariables(renderer);
 		writeGameMenu(renderer);
 		writePauseMenu(renderer);
 		countStart(renderer);

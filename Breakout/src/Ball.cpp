@@ -5,90 +5,154 @@
 #include "Paddle.h"
 #include "GlobalVariables.h"
 
-SDL_Rect ballRect;
+const int maxBalls = 8;
+
+int actualBalls = 1;
+SDL_Rect* ballRect;
 SDL_Surface* ballImage;
 SDL_Texture* ballTexture;
-int ballSpeedX;
-int ballSpeedY;
-int ballSpeedChange;
+int* ballSpeedX;
+int* ballSpeedY;
+int ballSpeedChangeX;
+int ballSPeedChangeY;
 int maxBallSpeed;
 
-void centerBall() {
-	ballRect.x = boardWidth / 2 - ballRect.w / 2;
-	ballRect.y = paddle.y - ballRect.h;
+void centerBall(int ballIndex) {
+	ballRect[ballIndex].x = paddle.x + paddle.w / 2 - ballRect[ballIndex].w / 2;//   boardWidth / 2 - ballRect[ballIndex].w / 2;
+	ballRect[ballIndex].y = paddle.y - ballRect[ballIndex].h;
 }
 
 void closeTextureBall() {
 	SDL_DestroyTexture(ballTexture);
+	delete[] ballRect;
+	delete[] ballSpeedX;
+	delete[] ballSpeedY;
+}
+
+void initBallSpeed(int ballIndex) {
+	if (rand() % 2 < 1)
+		ballSpeedX[ballIndex] = SCREEN_WIDTH / 128;
+	else
+		ballSpeedX[ballIndex] = -SCREEN_WIDTH / 128;
+	ballSpeedY[ballIndex] = -SCREEN_HEIGHT / 72;
+}
+
+void adNewBall() {
+	if (actualBalls < maxBalls) {
+		centerBall(actualBalls);
+		initBallSpeed(actualBalls);
+		actualBalls++;
+	}
 }
 
 void initBall() {
-	ballRect.w = boardWidth / 40;
-	ballRect.h = SCREEN_HEIGHT / 30;
-	ballRect.x = boardWidth / 2 - ballRect.w / 2;
-	ballRect.y = paddle.y - ballRect.h;
+	ballRect = new SDL_Rect[maxBalls];
+	ballSpeedX = new int[maxBalls];
+	ballSpeedY = new int[maxBalls];
+	for (int i = 0; i < maxBalls; i++) {
+		ballRect[i].w = boardWidth / 40;
+		ballRect[i].h = SCREEN_HEIGHT / 30;
+	}
+	initBallSpeed(0);
+	ballRect[0].x = boardWidth / 2 - ballRect[0].w / 2;
+	ballRect[0].y = paddle.y - ballRect[0].h;
 
-	ballSpeedX = SCREEN_WIDTH / 128;
-	ballSpeedY = -SCREEN_HEIGHT / 72;
-	ballSpeedChange = ballSpeedX / 2;
-	maxBallSpeed = ballSpeedChange * 4;
+	ballSpeedChangeX = abs(ballSpeedX[0] / 2);
+	ballSPeedChangeY = abs(ballSpeedY[0] / 2);
+	maxBallSpeed = ballSpeedChangeX * 4;
 }
 
-void changeBallMovementWithBrick(SDL_Rect rect, SDL_Rect brick) {
-	if (ballSpeedY > 0 && rect.y < brick.y) {
-		ballSpeedY = -ballSpeedY;
+SDL_Point* getActualBallPercentages(SDL_Point* percentages) {
+	for (int i = 0; i < actualBalls; i++) {
+		int centerX = ballRect[i].x + ballRect[i].w / 2;
+		int centerY = ballRect[i].y + ballRect[i].h / 2;
+		percentages[i].x = (centerX * 100) / SCREEN_WIDTH;
+		percentages[i].y = (centerY * 100) / SCREEN_HEIGHT;
 	}
-	else if (rect.y + rect.h > brick.y + brick.h) {
-		ballSpeedY = -ballSpeedY;
-	}
-	else if (ballSpeedX > 0 && rect.x < brick.x) {
-		ballSpeedX = -ballSpeedX;
-	}
-	else if (rect.x + rect.w > brick.x + brick.w) {
-		ballSpeedX = -ballSpeedX;
+	return percentages;
+}
+
+void reziseBalls() {
+	for (int i = 0; i < maxBalls; i++) {
+		ballRect[i].w = boardWidth / 40;
+		ballRect[i].h = SCREEN_HEIGHT / 30;
 	}
 }
 
-void incrementBallSpeedX() {
-	if (ballSpeedX > 0)
-		ballSpeedX += ballSpeedChange;
+void changeBallMovementWithBrick(SDL_Rect brick, int ballIndex) {
+	if (ballSpeedY[ballIndex] > 0 && ballRect[ballIndex].y < brick.y) {
+		ballSpeedY[ballIndex] = -ballSpeedY[ballIndex];
+	}
+	else if (ballRect[ballIndex].y + ballRect[ballIndex].h > brick.y + brick.h) {
+		ballSpeedY[ballIndex] = -ballSpeedY[ballIndex];
+	}
+	else if (ballSpeedX[ballIndex] > 0 && ballRect[ballIndex].x < brick.x) {
+		ballSpeedX[ballIndex] = -ballSpeedX[ballIndex];
+	}
+	else if (ballRect[ballIndex].x + ballRect[ballIndex].w > brick.x + brick.w) {
+		ballSpeedX[ballIndex] = -ballSpeedX[ballIndex];
+	}
+}
+
+void showBalls(SDL_Renderer* renderer) {
+	for (int i = 0; i < actualBalls; i++) {
+		SDL_RenderCopy(renderer, ballTexture, NULL, &ballRect[i]);
+	}
+}
+
+void incrementBallSpeedX(int ballIndex) {
+	if (ballSpeedX[ballIndex] > 0)
+		ballSpeedX[ballIndex] += ballSpeedChangeX;
 	else
-		ballSpeedX -= ballSpeedChange;
+		ballSpeedX[ballIndex] -= ballSpeedChangeX;
 }
 
-void incrementBallSpeedY() {
-	int incrementY = SCREEN_HEIGHT / 72;
-	if (ballSpeedY > 0)
-		ballSpeedY += incrementY;
+void incrementBallSpeedY(int ballIndex) {
+	int incrementY = SCREEN_HEIGHT / 72;//first speed of ball in Y
+	if (ballSpeedY[ballIndex] > 0)
+		ballSpeedY[ballIndex] += incrementY;
 	else
-		ballSpeedY -= incrementY;
+		ballSpeedY[ballIndex] -= incrementY;
 }
 
-void decrementBallSpeedX() {
-	if (ballSpeedX > 0) {
-		if (ballSpeedX - ballSpeedChange > 0)
-			ballSpeedX -= ballSpeedChange;
+void decrementBallSpeedX(int ballIndex) {
+	if (ballSpeedX[ballIndex] > 0) {
+		if (ballSpeedX[ballIndex] - ballSpeedChangeX > 0)
+			ballSpeedX[ballIndex] -= ballSpeedChangeX;
 	}
-	else if (ballSpeedX + ballSpeedChange < 0)
-		ballSpeedX += ballSpeedChange;
+	else if (ballSpeedX[ballIndex] + ballSpeedChangeX < 0)
+		ballSpeedX[ballIndex] += ballSpeedChangeX;
 }
 
-void decrementBallSpeedY() {
-	int incrementY = SCREEN_HEIGHT / 72;
-	if (ballSpeedY > 0) {
-		if (ballSpeedY - incrementY > 0)
-			ballSpeedY -= incrementY;
+void decrementBallSpeedY(int ballIndex) {
+	int incrementY = SCREEN_HEIGHT / 72;//first speed of ball in Y
+	if (ballSpeedY[ballIndex] > 0) {
+		if (ballSpeedY[ballIndex] - incrementY > 0)
+			ballSpeedY[ballIndex] -= incrementY;
 	}
-	else if (ballSpeedY + incrementY < 0)
-		ballSpeedY += incrementY;
+	else if (ballSpeedY[ballIndex] + incrementY < 0)
+		ballSpeedY[ballIndex] += incrementY;
 }
 
-//get the actual speed paddle in termns of changeSpeed
-int getMultiplicatorBallSpeed() {
-	return (ballSpeedX / ballSpeedChange);
+//get the actual ball speed in termns of ballSpeedChangeX and ballSPeedChangeY
+SDL_Point* getBallSpeedMultiplicators(SDL_Point* ballMultiplicator) {
+	for (int i = 0; i < actualBalls; i++) {
+		ballMultiplicator[i].x = ballSpeedX[i] / ballSpeedChangeX;
+		ballMultiplicator[i].y = ballSpeedY[i] / ballSPeedChangeY;
+	}
+	return ballMultiplicator;
 }
 
-//set the paddleSpeed in a multiplicator of changeSpeed
-void setMultiplicatorBallSpeed(int balleMultiplicator) {
-	ballSpeedX = balleMultiplicator * ballSpeedChange;
+//set the paddleSpeed in a multiplicator of ballSPeedChange
+void setMultiplicatorBallSpeed(SDL_Point* ballMultiplicator) {
+	for (int i = 0; i < actualBalls; i++) {
+		ballSpeedX[i] = ballMultiplicator[i].x * ballSpeedChangeX;
+		ballSpeedY[i] = ballMultiplicator[i].y * ballSPeedChangeY;
+	}
+}
+
+void restartBall() {
+	actualBalls = 1;
+	centerBall(0);
+	initBallSpeed(0);
 }

@@ -17,7 +17,7 @@ SDL_Rect setWindowRectCoordinates(int percentageX, int percentageY, SDL_Rect rec
 	return rect;
 }
 
-//get the coordinates in percentage of the screen of the rect(center)
+//get the coordinates in percentage of the screen of the rect(center) in x,y
 void getActualRectCoordinates(int* x, int* y, SDL_Rect rect) {
 	int centerRectX = rect.x + rect.w / 2;
 	int centerRectY = rect.y + rect.h / 2;
@@ -33,11 +33,11 @@ void generalKey(SDL_Event event, SDL_Renderer* renderer) {
 	else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
 		//change the window size
 		int paddleX, paddleMultiplicator;
-		int ballX, ballY;
-		int ballMultiplicator;
+		SDL_Point* ballPercentages = new SDL_Point[actualBalls];
+		SDL_Point* ballMultiplicator = new SDL_Point[actualBalls];
+		ballPercentages = getActualBallPercentages(ballPercentages);
 		getActualPadddleCoordinates(&paddleX);
-		getActualRectCoordinates(&ballX, &ballY, ballRect);
-		ballMultiplicator = getMultiplicatorBallSpeed();
+		ballMultiplicator = getBallSpeedMultiplicators(ballMultiplicator);
 		paddleMultiplicator = getMultiplicatorPaddleSpeed();
 		SDL_Point* capsulePercentages = new SDL_Point[actualCapsules];
 		capsulePercentages = getActualCapsulePercentages(capsulePercentages);
@@ -47,14 +47,20 @@ void generalKey(SDL_Event event, SDL_Renderer* renderer) {
 		changeWindowGameSize(renderer);
 
 		setWindowPaddleCoordinates(paddleX);
-		ballRect = setWindowRectCoordinates(ballX, ballY, ballRect);
+		for (int i = 0; i < actualBalls; i++) {
+			ballRect[i] = setWindowRectCoordinates(ballPercentages[i].x, ballPercentages[i].y, ballRect[i]);
+
+		}
+		reziseBalls();
 		setMultiplicatorBallSpeed(ballMultiplicator);
 		setMultiplicatorPaddleSpeed(paddleMultiplicator);
 		resizeCapsules(); 
 		for (int i = 0; i < actualCapsules; i++) {
 			capsules[i].rect = setWindowRectCoordinates(capsulePercentages[i].x, capsulePercentages[i].y, capsules[i].rect);
 		}
+		delete[] ballMultiplicator;
 		delete[] capsulePercentages;
+		delete[] ballPercentages;
 		resizeBullets();
 		for (int i = 0; i < actualBullets; i++) {
 			bullets[i] = setWindowRectCoordinates(bulletPercentages[i].x, bulletPercentages[i].y, bullets[i]);
@@ -157,16 +163,21 @@ void detectPauseKey(SDL_Renderer* renderer) {
 						break;
 					case 3:
 						int paddleX;
-						int ballX, ballY;
-						int ballMultiplicator;
+						SDL_Point* ballMultiplicator = new SDL_Point[actualBalls];
 						getActualPadddleCoordinates(&paddleX);
-						getActualRectCoordinates(&ballX, &ballY, ballRect);
-						ballMultiplicator = getMultiplicatorBallSpeed();
+						SDL_Point* ballPercentages = new SDL_Point[actualBalls];
+						ballPercentages = getActualBallPercentages(ballPercentages);
+						ballMultiplicator = getBallSpeedMultiplicators(ballMultiplicator);
 						fullscreenOnOff(renderer);
 						changeFullscreenGameSize(renderer);
 						setWindowPaddleCoordinates(paddleX);
-						ballRect = setWindowRectCoordinates(ballX, ballY, ballRect);
+						for (int i = 0; i < actualBalls; i++) {
+							ballRect[i] = setWindowRectCoordinates(ballPercentages[i].x, ballPercentages[i].y, ballRect[i]);
+						}
+						reziseBalls();
 						setMultiplicatorBallSpeed(ballMultiplicator);
+						delete[] ballMultiplicator;
+						delete[] ballPercentages;
 						break;
 					}
 					break;

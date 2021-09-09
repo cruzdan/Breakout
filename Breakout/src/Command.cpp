@@ -138,16 +138,16 @@ void checkCommandMatch(SDL_Renderer* renderer) {
 				decrementPaddleSpeed();
 				break;
 			case 8:
-				incrementBallSpeedX();
+				incrementBallSpeedX(0);
 				break;
 			case 9:
-				incrementBallSpeedY();
+				incrementBallSpeedY(0);
 				break;
 			case 10:
-				decrementBallSpeedX();
+				decrementBallSpeedX(0);
 				break;
 			case 11:
-				decrementBallSpeedY();
+				decrementBallSpeedY(0);
 				break;
 			}
 			break;

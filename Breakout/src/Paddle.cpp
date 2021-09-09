@@ -27,7 +27,7 @@ void updatePaddle() {
 	if (paddleSpeed > 0) {
 		if (paddle.x + paddle.w + paddleSpeed <= boardWidth) {
 			paddle.x += paddleSpeed;
-			//doww paddle speed
+			//doww speed paddle
 			paddleSpeed -= changeSpeed / 2;
 		}
 		else
@@ -65,12 +65,12 @@ void getActualPadddleCoordinates(int* x) {
 	*x = 100 * centerRectX / SCREEN_WIDTH;
 }
 
-//get the actual paddle speed in termns of changeSpeed
+//get the actual speed paddle in termns of changeSpeed
 int getMultiplicatorPaddleSpeed() {
 	return (paddleSpeed / changeSpeed);
 }
 
-//set the paddle speed in a multiplicator of changeSpeed
+//set the speed paddle in a multiplicator of changeSpeed
 void setMultiplicatorPaddleSpeed(int paddleMultiplicator) {
 	paddleSpeed = paddleMultiplicator * changeSpeed;
 }

@@ -22,7 +22,7 @@ int main(int argc, char* args[]) {
 	loadMusic();
 	loadImage(renderer, &ballImage, &ballTexture, "images/ball1.png");
 	initRandom();
-	initVariables();
+	initVariables(renderer);
 	activateBricks();
 	writeGameMenu(renderer);
 	writePauseMenu(renderer);

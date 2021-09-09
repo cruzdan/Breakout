@@ -8,6 +8,9 @@
 #include "GlobalVariables.h"
 #include "Paddle.h"
 #include "Capsule.h"
+#include "Delete.h"
+
+#include <iostream>
 
 //rect is the ball or the bullet
 bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
@@ -50,8 +53,8 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	return false;
 }
 
-//rect is the ball or the bullet
-bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball) {
+//rect is the ball or the bullet, ball indicates if the rect is a ball, and ball index is the ballRect index
+bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, int ballIndex) {
 	//detect the collision of the ball with the bricks
 	if (rect.y <= lastBrickY && rect.y + rect.h >= rectangles[0].y) {
 		int pos = 0;
@@ -67,17 +70,16 @@ bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball) 
 				level++;
 				writeLevel(renderer);
 				centerPaddle();
-				centerBall();
+				restartBall();
 				activateBricks();
 				restartCapsules();
 				restartBullets();
 				initCapsules(1 + rand() % totalRectangles, totalRectangles);
-				ballSpeedY = -abs(ballSpeedY);
 				timer = 0;
 				serve = true;
 			}
 			if (ball)
-				changeBallMovementWithBrick(rect, rectangles[pos]);
+				changeBallMovementWithBrick(rectangles[pos], ballIndex);
 			return true;
 		}
 	}
@@ -85,51 +87,63 @@ bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball) 
 }
 
 void update(SDL_Renderer* renderer, int time) {
-	int xI = ballRect.x + ballSpeedX;
-	int xF = xI + ballRect.w;
-	int yI = ballRect.y + ballSpeedY;
-	int yF = yI + ballRect.h;
-	if (xI < 0 || xF > boardWidth) {
-		ballSpeedX = -ballSpeedX;
-	}
-	else if (yI < 0) {
-		ballSpeedY = -ballSpeedY;
-	}
-	else if (yF > SCREEN_HEIGHT) {
-		//the player loses a life
-		ballSpeedY = -ballSpeedY;
-		lifes--;
-		if (lifes == 0) {
-			restart(renderer);
-			return;
+	for (int i = 0; i < actualBalls; i++) {
+		int xI = ballRect[i].x + ballSpeedX[i];
+		int xF = xI + ballRect[i].w;
+		int yI = ballRect[i].y + ballSpeedY[i];
+		int yF = yI + ballRect[i].h;
+		if (xI < 0 || xF > boardWidth) {
+			ballSpeedX[i] = -ballSpeedX[i];
 		}
-		else {
-			writeLife(renderer);
-			centerPaddle();
-			centerBall();
-			serve = true;
-			restartCapsules();
-			restartBullets();
-			return;
+		else if (yI < 0) {
+			ballSpeedY[i] = -ballSpeedY[i];
 		}
-
-	}
-	if (SDL_HasIntersection(&ballRect, &paddle)) {
-		Mix_PlayChannel(1, sound, 0);
-		ballSpeedY = -abs(ballSpeedY);
-		if (xF < paddle.x + paddle.w / 3) {
-			if (ballSpeedX - ballSpeedChange > -maxBallSpeed)
-				ballSpeedX -= ballSpeedChange;
+		else if (yF > SCREEN_HEIGHT) {
+			if (actualBalls < 2) {
+				//the player loses a life
+				ballSpeedY[i] = -ballSpeedY[i];
+				lifes--;
+				if (lifes == 0) {
+					restart(renderer);
+					return;
+				}
+				else {
+					writeLife(renderer);
+					centerPaddle();
+					restartBall();
+					serve = true;
+					restartCapsules();
+					restartBullets();
+					return;
+				}
+			}
+			else {
+				//delete a ball
+				deleteElementOfRectArray(ballRect, i, actualBalls);
+				deleteElementOfIntArray(ballSpeedX, i, actualBalls);
+				deleteElementOfIntArray(ballSpeedY, i, actualBalls);
+				actualBalls--;
+				std::cout << "now, have " << actualBalls << " balls" << std::endl;
+			}
 		}
-		else if (xF > paddle.x + 2 * paddle.w / 3)
-			if (ballSpeedX + ballSpeedChange < maxBallSpeed)
-				ballSpeedX += ballSpeedChange;
+		
+		if (SDL_HasIntersection(&ballRect[i], &paddle)) {
+			Mix_PlayChannel(1, sound, 0);
+			ballSpeedY[i] = -abs(ballSpeedY[i]);
+			
+			if (xF < paddle.x + paddle.w / 3) {
+				if (ballSpeedX[i] - ballSpeedChangeX > -maxBallSpeed)
+					ballSpeedX[i] -= ballSpeedChangeX;
+			}
+			else if (xF > paddle.x + 2 * paddle.w / 3)
+				if (ballSpeedX[i] + ballSpeedChangeX < maxBallSpeed)
+					ballSpeedX[i] += ballSpeedChangeX;
+		}
+		ballRect[i].x += ballSpeedX[i];
+		ballRect[i].y += ballSpeedY[i];
+		checkRectCollisionBricks(ballRect[i], renderer, true, i);
 	}
-	ballRect.x += ballSpeedX;
-	ballRect.y += ballSpeedY;
-
-	checkRectCollisionBricks(ballRect, renderer, true);
 	updatePaddle();
-	updateCapsules();
+	updateCapsules(renderer);
 	updateBullets(renderer, time);
 }

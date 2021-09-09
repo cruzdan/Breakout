@@ -248,6 +248,7 @@ xcopy /y /d $(SolutionDir)thirdparty\SDL\lib\x64\zlib1.dll $(OutDir)
     <ClCompile Include="src\Capsule.cpp" />
     <ClCompile Include="src\Close.cpp" />
     <ClCompile Include="src\Command.cpp" />
+    <ClCompile Include="src\Delete.cpp" />
     <ClCompile Include="src\FPS.cpp" />
     <ClCompile Include="src\GlobalVariables.cpp" />
     <ClCompile Include="src\Image.cpp" />
@@ -268,6 +269,7 @@ xcopy /y /d $(SolutionDir)thirdparty\SDL\lib\x64\zlib1.dll $(OutDir)
     <ClInclude Include="src\Capsule.h" />
     <ClInclude Include="src\Close.h" />
     <ClInclude Include="src\Command.h" />
+    <ClInclude Include="src\Delete.h" />
     <ClInclude Include="src\FPS.h" />
     <ClInclude Include="src\GlobalVariables.h" />
     <ClInclude Include="src\Image.h" />

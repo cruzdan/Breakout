@@ -19,9 +19,8 @@ void show(SDL_Renderer* renderer) {
 			SDL_RenderCopy(renderer, textStart, NULL, &startRect);
 		}
 		else {
-			SDL_RenderCopy(renderer, ballTexture, NULL, &ballRect);
+			showBalls(renderer);
 			showBricks();
-			
 			showCapsules(renderer);
 			showBullets(renderer);
 		}

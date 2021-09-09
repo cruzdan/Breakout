@@ -18,9 +18,8 @@ void restart(SDL_Renderer* renderer) {
 	lifes = 3;
 	writeLife(renderer);
 	centerPaddle();
-	centerBall();
+	restartBall();
 	serve = true;
-	ballSpeedY = -SCREEN_HEIGHT / 72;
 	restartCapsules();
 	restartBullets();
 	initCapsules(1 + rand() % totalRectangles, totalRectangles);

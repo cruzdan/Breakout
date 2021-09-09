@@ -4,6 +4,11 @@
 #include "Paddle.h"
 #include "iostream"
 #include "Update.h"
+#include "Delete.h"
+#include "Ball.h"
+
+#include <SDL_ttf.h>
+#include <string>
 
 int totalCapsules;//max capsules in level
 int *brickCapsuleIndex;
@@ -25,17 +30,22 @@ int shootTimer = 0;
 int timerNextBullet = 0;
 bool paddleShoot = false;
 
+SDL_Texture* textShootTimer;
+SDL_Rect textShootTimerRect;
+
 void initRandom() {
 	srand((int)time(NULL));
 }
 
-void initCapsuleVariables() {
+void initCapsuleVariables(SDL_Renderer* renderer) {
 	capsuleWidth = rectangles[0].w / 2;
 	capsuleHeight = rectangles[0].h / 2;
 	capsuleSpeed = SCREEN_HEIGHT / 240;
 	bulletWidth = SCREEN_WIDTH / 72;
 	bulletHeight = SCREEN_HEIGHT / 72;
 	bulletSpeed = SCREEN_HEIGHT / 72;
+
+	changeTextShootActiveText(0, renderer);
 }
 
 //check if the element exists in the array, return the index of the first finding or -1 if the element does not exists in total elements of the array
@@ -73,23 +83,7 @@ void initCapsules(int total, int max) {
 }
 
 //delete the element in the index of the array and rearrange the array.Max is the number of elements of the array
-int* deleteElementOfIntArray(int* array, int index, int max) {
-	for (int i = index; i < max - 1; i++) {
-		array[i] = array[i + 1];
-	}
-	return array;
-}
-
-//delete the element in the index of the array and rearrange the array.Max is the number of elements of the array
 Capsule* deleteElementOfCapsuleArray(Capsule* array, int index, int max) {
-	for (int i = index; i < max - 1; i++) {
-		array[i] = array[i + 1];
-	}
-	return array;
-}
-
-//delete the element in the index of the array and rearrange the array.Max is the number of elements of the array
-SDL_Rect* deleteElementOfRectArray(SDL_Rect* array, int index, int max) {
 	for (int i = index; i < max - 1; i++) {
 		array[i] = array[i + 1];
 	}
@@ -148,17 +142,19 @@ void activateShoot(int seconds) {
 	shootTimer += seconds;
 }
 
-void takeCapsule(int powerType) {
+void takeCapsule(int powerType, SDL_Renderer* renderer) {
 	switch (powerType) {
 	case 0:
 		activateShoot(3000);
+		changeTextShootActiveText(shootTimer / 1000, renderer);
 		break;
 	case 1:
+		adNewBall();
 		break;
 	}
 }
 
-void updateCapsules() {
+void updateCapsules(SDL_Renderer* renderer) {
 	for (int i = actualCapsules - 1; i >= 0; i--) {
 		//move
 		capsules[i].rect.y += capsuleSpeed;
@@ -166,7 +162,7 @@ void updateCapsules() {
 		//check collision with paddle
 		if (capsules[i].rect.y + capsules[i].rect.h >= paddle.y && SDL_HasIntersection(&capsules[i].rect, &paddle)) {
 			//has intersection with paddle
-			takeCapsule(capsules[i].type);
+			takeCapsule(capsules[i].type, renderer);
 			deleteElementOfCapsuleArray(capsules, i, actualCapsules);
 			actualCapsules--;
 			continue;
@@ -210,6 +206,7 @@ void closeCapsule() {
 	delete[] powerUpType;
 	delete[] capsules;
 	delete[] bullets;
+	SDL_DestroyTexture(textShootTimer);
 }
 
 void updateBullets(SDL_Renderer* renderer, int time) {
@@ -217,7 +214,7 @@ void updateBullets(SDL_Renderer* renderer, int time) {
 		bullets[i].y -= bulletSpeed;
 
 		//check collision with bricks
-		if (checkRectCollisionBricks(bullets[i], renderer, false)) {
+		if (checkRectCollisionBricks(bullets[i], renderer, false, -1)) {
 			if (actualBullets <= 0)
 				return;
 			bullets = deleteElementOfRectArray(bullets, i, actualBullets);
@@ -238,6 +235,7 @@ void updateBullets(SDL_Renderer* renderer, int time) {
 		}
 		else {
 			shootTimer -= time;
+			changeTextShootActiveText(shootTimer / 1000, renderer);
 		}
 		if (timerNextBullet > 0)
 			timerNextBullet -= time;
@@ -249,6 +247,10 @@ void showBullets(SDL_Renderer* renderer) {
 	for (int i = 0; i < actualBullets; i++) {
 		SDL_RenderFillRect(renderer, &bullets[i]);
 	}
+}
+
+void showTextScore(SDL_Renderer* renderer) {
+	SDL_RenderCopy(renderer, textShootTimer, NULL, &textShootTimerRect);
 }
 
 void shoot() {
@@ -272,4 +274,16 @@ void shoot() {
 		};
 		actualBullets++;
 	}
+}
+
+void changeTextShootActiveText(int seconds, SDL_Renderer* renderer) {
+	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30);
+	SDL_Surface* textSurface;
+	SDL_Color color = { 255,255,255 };
+	std::string a = "Shoot: " + std::to_string(seconds) + " ";
+	textSurface = TTF_RenderText_Solid(font,a.c_str(), color);
+	textShootTimer = SDL_CreateTextureFromSurface(renderer, textSurface);
+	SDL_FreeSurface(textSurface);
+	textSurface = nullptr;
+	TTF_CloseFont(font);
 }
