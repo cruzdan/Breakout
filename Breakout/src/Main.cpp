@@ -20,12 +20,14 @@ int main(int argc, char* args[]) {
 	if (!init(&window, &renderer))
 		return -1;
 	loadMusic();
-	loadImage(renderer, &ballImage, &ballTexture, "images/ball1.png");
+	loadImage(renderer, &ballTexture, "images/ball1.png");
 	initRandom();
 	initVariables(renderer);
-	activateBricks();
+	initBrickLives();
 	writeGameMenu(renderer);
 	writePauseMenu(renderer);
+	initBackgroundIndex();
+	loadBackgroundImage(renderer);
 	initCapsules(1 + rand() % totalRectangles, totalRectangles);
 	Mix_PlayMusic(music, -1);
 

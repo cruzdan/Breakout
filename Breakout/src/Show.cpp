@@ -10,8 +10,9 @@
 void show(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+	SDL_SetRenderDrawColor(renderer, 168, 2, 47, 0);
 	if (menuIndex == 0) {
+		showBackgroundImage(renderer);
 		SDL_RenderFillRect(renderer, &paddle);
 		SDL_RenderDrawLine(renderer, boardWidth, 0, boardWidth, SCREEN_HEIGHT);
 		showGameMenu(renderer);
@@ -26,6 +27,7 @@ void show(SDL_Renderer* renderer) {
 		}
 	}
 	else {
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		showPauseMenu(renderer);
 	}
 	if (commandLine) {

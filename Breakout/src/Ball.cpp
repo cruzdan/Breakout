@@ -9,7 +9,6 @@ const int maxBalls = 8;
 
 int actualBalls = 1;
 SDL_Rect* ballRect;
-SDL_Surface* ballImage;
 SDL_Texture* ballTexture;
 int* ballSpeedX;
 int* ballSpeedY;
@@ -18,7 +17,7 @@ int ballSPeedChangeY;
 int maxBallSpeed;
 
 void centerBall(int ballIndex) {
-	ballRect[ballIndex].x = paddle.x + paddle.w / 2 - ballRect[ballIndex].w / 2;//   boardWidth / 2 - ballRect[ballIndex].w / 2;
+	ballRect[ballIndex].x = paddle.x + paddle.w / 2 - ballRect[ballIndex].w / 2;
 	ballRect[ballIndex].y = paddle.y - ballRect[ballIndex].h;
 }
 

@@ -3,4 +3,4 @@
 #include <SDL_image.h>
 #include <string>
 
-void loadImage(SDL_Renderer* renderer, SDL_Surface** image, SDL_Texture** texture, std::string path);
+void loadImage(SDL_Renderer* renderer, SDL_Texture** texture, std::string path);

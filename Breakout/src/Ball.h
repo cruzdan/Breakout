@@ -2,7 +2,6 @@
 #include <SDL.h>
 extern SDL_Texture* ballTexture;
 extern SDL_Rect* ballRect;
-extern SDL_Surface* ballImage;
 extern int* ballSpeedX;
 extern int* ballSpeedY;
 extern int ballSpeedChangeX;

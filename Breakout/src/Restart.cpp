@@ -10,7 +10,7 @@
 void restart(SDL_Renderer* renderer) {
 	paddleSpeed = 0;
 	timer = 0;
-	activateBricks();
+	initBrickLives();
 	score = 0;
 	writeScore(renderer);
 	level = 1;
@@ -22,5 +22,7 @@ void restart(SDL_Renderer* renderer) {
 	serve = true;
 	restartCapsules();
 	restartBullets();
+	initBackgroundIndex();
+	loadBackgroundImage(renderer);
 	initCapsules(1 + rand() % totalRectangles, totalRectangles);
 }

@@ -42,3 +42,6 @@ void turnOnMusic(SDL_Renderer* renderer);
 void turnOffMusic(SDL_Renderer* renderer);
 void turnOnSound(SDL_Renderer* renderer);
 void turnOffSound(SDL_Renderer* renderer);
+void initBackgroundIndex();
+void loadBackgroundImage(SDL_Renderer* renderer);
+void showBackgroundImage(SDL_Renderer* renderer);

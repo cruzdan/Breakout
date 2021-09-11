@@ -19,7 +19,7 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	posY = (rect.y - initialBrickY) / (brick.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
 
-	if (brickStatus[pos] && SDL_HasIntersection(&rect, &rectangles[pos])) {
+	if (brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
 		*position = pos;
 		return true;
 	}
@@ -28,7 +28,7 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	posY = (rect.y - initialBrickY) / (brick.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
 
-	if (brickStatus[pos] && SDL_HasIntersection(&rect, &rectangles[pos])) {
+	if (brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
 		*position = pos;
 		return true;
 	}
@@ -37,7 +37,7 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	posY = (rect.y + rect.h - initialBrickY) / (brick.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
 
-	if (brickStatus[pos] && SDL_HasIntersection(&rect, &rectangles[pos])) {
+	if (brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
 		*position = pos;
 		return true;
 	}
@@ -46,7 +46,7 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	posY = (rect.y + rect.h - initialBrickY) / (brick.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
 
-	if (brickStatus[pos] && SDL_HasIntersection(&rect, &rectangles[pos])) {
+	if (brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
 		*position = pos;
 		return true;
 	}
@@ -60,23 +60,32 @@ bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, 
 		int pos = 0;
 		if (checkRectCollisionBrick(rect, &pos)) {
 
-			checkBrickWithCapsule(pos);
+			
 
 			Mix_PlayChannel(1, sound, 0);
-			brickStatus[pos] = false;
 			score++;
+			brickLives[pos]--;
+			if (brickLives[pos] < 1) {
+				checkBrickWithCapsule(pos);
+				actualBricks--;
+			}
+				
+			
 			writeScore(renderer);
-			if (score % totalRectangles == 0) {
+			if (actualBricks < 1) {
 				level++;
 				writeLevel(renderer);
 				centerPaddle();
 				restartBall();
-				activateBricks();
+				initBrickLives();
 				restartCapsules();
 				restartBullets();
+				initBackgroundIndex();
+				loadBackgroundImage(renderer);
 				initCapsules(1 + rand() % totalRectangles, totalRectangles);
 				timer = 0;
 				serve = true;
+				return true;
 			}
 			if (ball)
 				changeBallMovementWithBrick(rectangles[pos], ballIndex);
@@ -123,7 +132,6 @@ void update(SDL_Renderer* renderer, int time) {
 				deleteElementOfIntArray(ballSpeedX, i, actualBalls);
 				deleteElementOfIntArray(ballSpeedY, i, actualBalls);
 				actualBalls--;
-				std::cout << "now, have " << actualBalls << " balls" << std::endl;
 			}
 		}
 		

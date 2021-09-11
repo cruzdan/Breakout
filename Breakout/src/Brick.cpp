@@ -2,6 +2,7 @@
 #include "Menu.h"
 #include "Brick.h"
 #include "GlobalVariables.h"
+#include <stdlib.h>
 
 int freeSizeX;//space between two bricks in x position
 int freeSizeY;//space between two bricks in y position
@@ -9,16 +10,13 @@ int lastBrickY;//the last pixel in y of the bricks
 int initialBrickY;//the first pixel in y of the bricks
 SDL_Rect rectangles[totalRectangles];// bricks on the board
 SDL_Rect brick;
-bool brickStatus[totalRectanglesX * totalRectanglesY];//indicates if the brick[i] is on the board or not
+int brickLives[totalRectangles]; //indicates the lives of the bricks
+int actualBricks;
 
-//put all the brick status in true
-void activateBricks() {
-	int pos;
-	for (int j = 0; j < totalRectanglesY; j++) {
-		for (int i = 0; i < totalRectanglesX; i++) {
-			pos = i + j * totalRectanglesX;
-			brickStatus[pos] = true;
-		}
+void initBrickLives() {
+	actualBricks = totalRectangles;
+	for (int i = 0; i < totalRectangles; i++) {
+		brickLives[i] = 1 + rand() % 2;
 	}
 }
 
@@ -46,7 +44,7 @@ void showBricks() {
 	for (int j = 0; j < totalRectanglesY; j++) {
 		for (int i = 0; i < totalRectanglesX; i++) {
 			pos = i + j * totalRectanglesX;
-			if (brickStatus[pos])
+			if (brickLives[pos] > 0)
 				SDL_RenderFillRect(renderer, &rectangles[pos]);
 		}
 	}

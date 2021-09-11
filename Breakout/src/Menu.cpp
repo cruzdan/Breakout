@@ -5,12 +5,20 @@
 #include "Init.h"
 #include "Command.h"
 #include "Capsule.h"
+#include "Image.h"
+
+#include <iostream>
 
 //board
 int boardWidth;
 
 //menu
 int menuWidth;
+
+//backgroundImage
+int backGroundIndex = -1;//index of the backgorund image
+SDL_Rect backGroundRect;
+SDL_Texture* backgroundTexture;
 
 //Game Menu
 SDL_Rect score_board;
@@ -58,6 +66,50 @@ void assignProperties(SDL_Rect* rect, int y, int w, int h) {
 	rect->w = w;
 	rect->h = h;
 	rect->x = boardWidth + menuWidth / 2 - rect->w / 2;
+}
+
+void initBackgroundIndex() {
+	int random;
+	do {
+		random = rand() % 10;
+	} while (random == backGroundIndex);
+	backGroundIndex = random;
+	std::cout << "background index: " << backGroundIndex << std::endl;
+}
+
+void loadBackgroundImage(SDL_Renderer* renderer) {
+	switch (backGroundIndex) {
+	case 0:
+		loadImage(renderer, &backgroundTexture, "images/background/common-heather.jpg");
+		break;
+	case 1:
+		loadImage(renderer, &backgroundTexture, "images/background/field.jpg");
+		break;
+	case 2:
+		loadImage(renderer, &backgroundTexture, "images/background/house.jpg");
+		break;
+	case 3:
+		loadImage(renderer, &backgroundTexture, "images/background/lightning.jpg");
+		break;
+	case 4:
+		loadImage(renderer, &backgroundTexture, "images/background/petit-minou-lighthouse.jpg");
+		break;
+	case 5:
+		loadImage(renderer, &backgroundTexture, "images/background/port.jpg");
+		break;
+	case 6:
+		loadImage(renderer, &backgroundTexture, "images/background/street.jpg");
+		break;
+	case 7:
+		loadImage(renderer, &backgroundTexture, "images/background/walking.jpg");
+		break;
+	case 8:
+		loadImage(renderer, &backgroundTexture, "images/background/water.jpg");
+		break;
+	case 9:
+		loadImage(renderer, &backgroundTexture, "images/background/sand.jpg");
+		break;
+	}
 }
 
 void writeGameMenu(SDL_Renderer* renderer) {
@@ -152,6 +204,11 @@ void closeMenu() {
 	for (int i = 0; i < 9; i++) {
 		SDL_DestroyTexture(pauseTextures[i]);
 	}
+	SDL_DestroyTexture(backgroundTexture);
+}
+
+void showBackgroundImage(SDL_Renderer* renderer) {
+	SDL_RenderCopy(renderer, backgroundTexture, NULL, &backGroundRect);
 }
 
 void showGameMenu(SDL_Renderer* renderer) {
@@ -332,6 +389,7 @@ void initMenu() {
 		musicVolumeRect[i].x = musicVolumeRect[i - 1].x + musicVolumeRect[i - 1].w;
 		soundVolumeRect[i].x = soundVolumeRect[i - 1].x + soundVolumeRect[i - 1].w;
 	}
+	backGroundRect = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT };
 }
 
 void setSoundRects(int number) {
