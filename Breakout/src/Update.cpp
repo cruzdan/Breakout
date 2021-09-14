@@ -18,8 +18,7 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	posX = rect.x / (brick.w + freeSizeX);
 	posY = (rect.y - initialBrickY) / (brick.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
-
-	if (brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
+	if (pos >= 0 && pos < totalRectangles && brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
 		*position = pos;
 		return true;
 	}
@@ -28,7 +27,7 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	posY = (rect.y - initialBrickY) / (brick.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
 
-	if (brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
+	if (pos >= 0 && pos < totalRectangles && brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
 		*position = pos;
 		return true;
 	}
@@ -37,7 +36,7 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	posY = (rect.y + rect.h - initialBrickY) / (brick.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
 
-	if (brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
+	if (pos >= 0 && pos < totalRectangles && brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
 		*position = pos;
 		return true;
 	}
@@ -46,11 +45,29 @@ bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	posY = (rect.y + rect.h - initialBrickY) / (brick.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
 
-	if (brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
+	if (pos >= 0 && pos < totalRectangles && brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
 		*position = pos;
 		return true;
 	}
 	return false;
+}
+
+void nextLevel(SDL_Renderer* renderer) {
+	level++;
+	writeLevel(renderer);
+	centerPaddle();
+	restartBall();
+	initBrickRows();
+	initBrickLives();
+	createRectangles();
+	initBrickImageType();
+	restartCapsules();
+	restartBullets();
+	initBackgroundIndex();
+	loadBackgroundImage(renderer);
+	initCapsules(1 + rand() % totalRectangles, totalRectangles);
+	timer = 0;
+	serve = true;
 }
 
 //rect is the ball or the bullet, ball indicates if the rect is a ball, and ball index is the ballRect index
@@ -73,18 +90,7 @@ bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, 
 			
 			writeScore(renderer);
 			if (actualBricks < 1) {
-				level++;
-				writeLevel(renderer);
-				centerPaddle();
-				restartBall();
-				initBrickLives();
-				restartCapsules();
-				restartBullets();
-				initBackgroundIndex();
-				loadBackgroundImage(renderer);
-				initCapsules(1 + rand() % totalRectangles, totalRectangles);
-				timer = 0;
-				serve = true;
+				nextLevel(renderer);
 				return true;
 			}
 			if (ball)

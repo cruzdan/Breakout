@@ -6,6 +6,8 @@
 #include "Menu.h"
 #include "Paddle.h"
 #include "Ball.h"
+#include "Update.h"
+#include "Brick.h"
 
 //command line
 bool commandLine = false;
@@ -14,13 +16,20 @@ std::string command = "";
 SDL_Texture* commandText;
 SDL_Rect commandTextRect;
 
+
 //fps
 bool fpsActive = false;
 SDL_Texture* fpsText;
 SDL_Rect fpsTextRect;
 
+const int totalCommands = 11;
+bool allCommands = false;
 
-std::string commands[12] = {
+//all commands
+SDL_Rect commandMenuRect;
+SDL_Texture* commandTextures[totalCommands];
+SDL_Rect commandRects[totalCommands];
+std::string commands[totalCommands] = {
 	"fps count on",
 	"fps count off",
 	"music on",
@@ -29,10 +38,9 @@ std::string commands[12] = {
 	"sound off",
 	"paddle speed up",
 	"paddle speed down",
-	"ball speed x up",
-	"ball speed y up",
-	"ball speed x down",
-	"ball speed y down"
+	"ball speed up",
+	"ball speed down",
+	"next level"
 };
 
 void initCommandLine() {
@@ -48,18 +56,57 @@ void initCommandLine() {
 	fpsTextRect.x = commandLineRect.x;
 	fpsTextRect.y = 0;
 	fpsTextRect.h = commandLineRect.h;
+
+	commandMenuRect.x = 0;
+	commandMenuRect.h = totalCommands * commandLineRect.h;
+	commandMenuRect.y = SCREEN_HEIGHT - commandMenuRect.h - commandLineRect.h;
+	commandMenuRect.w = SCREEN_WIDTH;
+
+	for (int i = 0; i < totalCommands; i++) {
+		commandRects[i].x = 0;
+		commandRects[i].y = commandMenuRect.y + i * commandLineRect.h;
+		commandRects[i].h = commandLineRect.h;
+	}
+	
+}
+
+void showAllCommands(SDL_Renderer* renderer) {
+	SDL_SetRenderDrawColor(renderer, 105, 105, 105, 0);
+	SDL_RenderFillRect(renderer, &commandMenuRect);
+	for (int i = 0; i < totalCommands; i++) {
+		SDL_RenderCopy(renderer, commandTextures[i], NULL, &commandRects[i]);
+	}
+}
+
+void writeAllCommands(SDL_Renderer* renderer) {
+	SDL_Color color = { 255,255,255 };
+	TTF_Font* font = TTF_OpenFont("fonts/OpenSans-Bold.ttf", commandLineRect.h);
+	SDL_Surface* textSurface;
+
+	for (int i = 0; i < totalCommands; i++) {
+		textSurface = TTF_RenderText_Solid(font, commands[i].c_str(), color);
+		commandTextures[i] = SDL_CreateTextureFromSurface(renderer, textSurface);
+		commandRects[i].w = textSurface->w;
+	}
+	
+
+	SDL_FreeSurface(textSurface);
+	textSurface = nullptr;
+	TTF_CloseFont(font);
 }
 
 void writeCommandLineText(SDL_Renderer* renderer, std::string text) {
 	SDL_Color color = { 255,255,255 };
 	TTF_Font* font = TTF_OpenFont("fonts/OpenSans-Bold.ttf", commandLineRect.h);
 	SDL_Surface* textSurface;
+
 	textSurface = TTF_RenderText_Solid(font, text.c_str(), color);
 	commandText = SDL_CreateTextureFromSurface(renderer, textSurface);
 	if(text.size() < 1)
 		commandTextRect.w = 0;
 	else
 		commandTextRect.w = textSurface->w;
+
 	SDL_FreeSurface(textSurface);
 	textSurface = nullptr;
 	TTF_CloseFont(font);
@@ -138,16 +185,15 @@ void checkCommandMatch(SDL_Renderer* renderer) {
 				decrementPaddleSpeed();
 				break;
 			case 8:
-				incrementBallSpeedX(0);
+				incrementBallSpeed();
 				break;
 			case 9:
-				incrementBallSpeedY(0);
+				decrementBallSpeed();
 				break;
 			case 10:
-				decrementBallSpeedX(0);
-				break;
-			case 11:
-				decrementBallSpeedY(0);
+				score += actualBricks;
+				writeScore(renderer);
+				nextLevel(renderer);
 				break;
 			}
 			break;
@@ -169,5 +215,11 @@ void closeCommand() {
 
 void closeFPS() {
 	SDL_DestroyTexture(fpsText);
+}
+
+void closeAllCommands() {
+	for (int i = 0; i < totalCommands; i++) {
+		SDL_DestroyTexture(commandTextures[i]);
+	}
 }
 

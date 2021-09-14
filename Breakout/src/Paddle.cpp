@@ -4,6 +4,17 @@
 SDL_Rect paddle;
 int paddleSpeed, maxSpeed, changeSpeed;
 
+void initPaddle() {
+	paddleSpeed = 0;
+	maxSpeed = (SCREEN_WIDTH / 72) * 5;
+	changeSpeed = SCREEN_WIDTH / 288;
+
+	paddle.w = boardWidth / 2;
+	paddle.h = SCREEN_HEIGHT / 60;
+	paddle.x = boardWidth / 2 - paddle.w / 2;
+	paddle.y = int(SCREEN_HEIGHT * 0.9);
+}
+
 void centerPaddle() {
 	paddle.x = boardWidth / 2 - paddle.w / 2;
 }
@@ -43,17 +54,6 @@ void updatePaddle() {
 	}
 }
 
-void initPaddle() {
-	paddleSpeed = 0;
-	maxSpeed = (SCREEN_WIDTH / 72) * 5;
-	changeSpeed = SCREEN_WIDTH / 288;
-
-	paddle.w = boardWidth / 5;
-	paddle.h = SCREEN_HEIGHT / 60;
-	paddle.x = boardWidth / 2 - paddle.w / 2;
-	paddle.y = int(SCREEN_HEIGHT * 0.9);
-}
-
 //put the rect in the x and y percentage of the screen
 void setWindowPaddleCoordinates(int percentageX) {
 	paddle.x = (percentageX * SCREEN_WIDTH) / 100 - paddle.w / 2;
@@ -80,6 +80,6 @@ void incrementPaddleSpeed() {
 }
 
 void decrementPaddleSpeed() {
-	if(changeSpeed - SCREEN_WIDTH / 288 >= 0)
-		changeSpeed -= SCREEN_WIDTH / 288;
+	paddleSpeed = 0;
+	changeSpeed = 0;
 }

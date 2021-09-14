@@ -52,7 +52,6 @@ void initVariables(SDL_Renderer* renderer) {
 	initMenu();
 	initPaddle();
 	initBall();
-	initBrickVariables();
 	createRectangles();
 	initCommandLine();
 	initCapsuleVariables(renderer);

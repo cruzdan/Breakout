@@ -12,6 +12,7 @@ void closeTextures() {
 	closeMenu();
 	closeCommand();
 	closeFPS();
+	closeAllCommands();
 }
 
 void close(SDL_Window* window, SDL_Renderer* renderer) {

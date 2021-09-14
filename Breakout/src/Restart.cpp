@@ -10,10 +10,13 @@
 void restart(SDL_Renderer* renderer) {
 	paddleSpeed = 0;
 	timer = 0;
+	level = 1;
+	initBrickRows();
 	initBrickLives();
+	createRectangles();
+	initBrickImageType();
 	score = 0;
 	writeScore(renderer);
-	level = 1;
 	writeLevel(renderer);
 	lifes = 3;
 	writeLife(renderer);

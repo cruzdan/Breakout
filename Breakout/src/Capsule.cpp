@@ -38,8 +38,8 @@ void initRandom() {
 }
 
 void initCapsuleVariables(SDL_Renderer* renderer) {
-	capsuleWidth = rectangles[0].w / 2;
-	capsuleHeight = rectangles[0].h / 2;
+	capsuleWidth = SCREEN_WIDTH / 36;
+	capsuleHeight = SCREEN_HEIGHT / 144;
 	capsuleSpeed = SCREEN_HEIGHT / 240;
 	bulletWidth = SCREEN_WIDTH / 72;
 	bulletHeight = SCREEN_HEIGHT / 72;

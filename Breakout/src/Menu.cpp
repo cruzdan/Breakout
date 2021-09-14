@@ -74,7 +74,6 @@ void initBackgroundIndex() {
 		random = rand() % 10;
 	} while (random == backGroundIndex);
 	backGroundIndex = random;
-	std::cout << "background index: " << backGroundIndex << std::endl;
 }
 
 void loadBackgroundImage(SDL_Renderer* renderer) {
@@ -317,9 +316,9 @@ void writeLevel(SDL_Renderer* renderer) {
 void writeScore(SDL_Renderer* renderer) {
 	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30);
 	SDL_Surface* textSurface;
-	char c[4];
-	SDL_itoa(score, c, 10);
-	textSurface = TTF_RenderText_Solid(font, c, color);
+	//char c[4];
+	//SDL_itoa(score, c, 10);
+	textSurface = TTF_RenderText_Solid(font, std::to_string(score).c_str(), color);
 	textPuntuation = SDL_CreateTextureFromSurface(renderer, textSurface);
 	SDL_FreeSurface(textSurface);
 	textSurface = nullptr;
@@ -499,6 +498,7 @@ void changeWindowGameSize(SDL_Renderer* renderer) {
 	writeLevel(renderer);
 	writeScore(renderer);
 	writeCommandLineText(renderer, command);
+	writeAllCommands(renderer);
 	writeFPSText(renderer);
 }
 

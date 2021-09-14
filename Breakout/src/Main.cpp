@@ -12,6 +12,7 @@
 #include "Paddle.h"
 #include "Image.h"
 #include "Capsule.h"
+#include "Command.h"
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -21,11 +22,14 @@ int main(int argc, char* args[]) {
 		return -1;
 	loadMusic();
 	loadImage(renderer, &ballTexture, "images/ball1.png");
-	initRandom();
+	initRandom(); 
+	initBrickRows();
 	initVariables(renderer);
-	initBrickLives();
+	initBrickLives(); 
+	initBrickImageType();
 	writeGameMenu(renderer);
 	writePauseMenu(renderer);
+	writeAllCommands(renderer);
 	initBackgroundIndex();
 	loadBackgroundImage(renderer);
 	initCapsules(1 + rand() % totalRectangles, totalRectangles);

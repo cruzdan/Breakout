@@ -76,7 +76,10 @@ void detectGameKey(SDL_Renderer* renderer) {
 		generalKey(event, renderer);
 		if (event.type == SDL_KEYDOWN) {
 			if (commandLine) {
-				addWordToCommand(renderer, event.key.keysym.scancode);
+				if (keys[SDL_SCANCODE_H]) 
+					allCommands = !allCommands;
+				else
+					addWordToCommand(renderer, event.key.keysym.scancode);
 			}
 			if (keys[SDL_SCANCODE_ESCAPE]) {
 				menuIndex = 1;
@@ -87,6 +90,9 @@ void detectGameKey(SDL_Renderer* renderer) {
 			else if (keys[SDL_SCANCODE_RETURN]) {
 				commandLine = false;
 				checkCommandMatch(renderer);
+				command = "";
+				writeCommandLineText(renderer, command);
+				allCommands = false;
 			}
 		}
 	}
@@ -96,7 +102,6 @@ void detectGameKey(SDL_Renderer* renderer) {
 	if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_RIGHT]) {
 		movePaddleRight();
 	}
-	
 	if (keys[SDL_SCANCODE_F]) {
 		shoot();
 	}
@@ -112,7 +117,10 @@ void detectPauseKey(SDL_Renderer* renderer) {
 		generalKey(event, renderer);
 		if (event.type == SDL_KEYDOWN) {
 			if (commandLine) {
-				addWordToCommand(renderer, event.key.keysym.scancode);
+				if (keys[SDL_SCANCODE_H])
+					allCommands = !allCommands;
+				else
+					addWordToCommand(renderer, event.key.keysym.scancode);
 			}
 			if (keys[SDL_SCANCODE_ESCAPE]) {
 				menuIndex = 0;
@@ -123,6 +131,9 @@ void detectPauseKey(SDL_Renderer* renderer) {
 			else if (keys[SDL_SCANCODE_RETURN]) {
 				commandLine = false;
 				checkCommandMatch(renderer);
+				command = "";
+				writeCommandLineText(renderer, command);
+				allCommands = false;
 			}	
 		}
 		if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {

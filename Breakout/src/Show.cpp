@@ -21,7 +21,7 @@ void show(SDL_Renderer* renderer) {
 		}
 		else {
 			showBalls(renderer);
-			showBricks();
+			showBricks(renderer);
 			showCapsules(renderer);
 			showBullets(renderer);
 		}
@@ -34,6 +34,8 @@ void show(SDL_Renderer* renderer) {
 		SDL_SetRenderDrawColor(renderer, 105, 105, 105, 0);
 		SDL_RenderFillRect(renderer, &commandLineRect);
 		showCommandLineText(renderer);
+		if(allCommands)
+			showAllCommands(renderer);
 	}
 	if (fpsActive) {
 		showFPSText(renderer);
