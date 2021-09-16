@@ -16,3 +16,4 @@ void initBrickImageType();
 void showBricks(SDL_Renderer* renderer);
 void initBrickLives();
 void initBrickRows();
+void initBrickTextures(SDL_Renderer* renderer);

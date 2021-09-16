@@ -22,7 +22,8 @@ int main(int argc, char* args[]) {
 		return -1;
 	loadMusic();
 	loadImage(renderer, &ballTexture, "images/ball1.png");
-	initRandom(); 
+	initRandom();
+	initBrickTextures(renderer);
 	initBrickRows();
 	initVariables(renderer);
 	initBrickLives(); 

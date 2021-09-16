@@ -17,7 +17,20 @@ int* brickLives; //indicates the lives of the bricks
 int* brickImageTypes;//indicates the type of image of the bricks
 int actualBricks;
 
-SDL_Texture* brickTexture;
+SDL_Texture* brickTexture[10];
+
+void initBrickTextures(SDL_Renderer* renderer) {
+	loadImage(renderer, &brickTexture[0], "images/bricks/beach.jpg");
+	loadImage(renderer, &brickTexture[1], "images/bricks/bulb.jpg");
+	loadImage(renderer, &brickTexture[2], "images/bricks/drop.jpg");
+	loadImage(renderer, &brickTexture[3], "images/bricks/drop-of-water.jpg");
+	loadImage(renderer, &brickTexture[4], "images/bricks/earth.jpg");
+	loadImage(renderer, &brickTexture[5], "images/bricks/green.jpg");
+	loadImage(renderer, &brickTexture[6], "images/bricks/lava.jpg");
+	loadImage(renderer, &brickTexture[7], "images/bricks/sand.jpg");
+	loadImage(renderer, &brickTexture[8], "images/bricks/steelwool.jpg");
+	loadImage(renderer, &brickTexture[9], "images/bricks/strawberry.jpg");
+}
 
 void initBrickRows() {
 	totalRectanglesY = level + rand() % 5;
@@ -62,46 +75,15 @@ void initBrickImageType() {
 void showBricks(SDL_Renderer* renderer) {
 	for (int i = 0; i < totalRectangles; i++) {
 		if (brickLives[i] > 0) {
-			switch (brickImageTypes[i]) {
-			case 0:
-				loadImage(renderer, &brickTexture, "images/bricks/beach.jpg");
-				break;
-			case 1:
-				loadImage(renderer, &brickTexture, "images/bricks/bulb.jpg");
-				break;
-			case 2:
-				loadImage(renderer, &brickTexture, "images/bricks/drop.jpg");
-				break;
-			case 3:
-				loadImage(renderer, &brickTexture, "images/bricks/drop-of-water.jpg");
-				break;
-			case 4:
-				loadImage(renderer, &brickTexture, "images/bricks/earth.jpg");
-				break;
-			case 5:
-				loadImage(renderer, &brickTexture, "images/bricks/green.jpg");
-				break;
-			case 6:
-				loadImage(renderer, &brickTexture, "images/bricks/lava.jpg");
-				break;
-			case 7:
-				loadImage(renderer, &brickTexture, "images/bricks/sand.jpg");
-				break;
-			case 8:
-				loadImage(renderer, &brickTexture, "images/bricks/steelwool.jpg");
-				break;
-			case 9:
-				loadImage(renderer, &brickTexture, "images/bricks/strawberry.jpg");
-				break;
-			}
-			SDL_RenderCopy(renderer, brickTexture, NULL, &rectangles[i]);
+			SDL_RenderCopy(renderer, brickTexture[brickImageTypes[i]], NULL, &rectangles[i]);
 		}
 	}
 }
 
 
 void closeBrick() {
-	SDL_DestroyTexture(brickTexture);
+	for(int i = 0; i < 10; i++)
+		SDL_DestroyTexture(brickTexture[i]);
 	delete[] rectangles;
 	delete[] brickLives;
 	delete[] brickImageTypes;
