@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include "Image.h"
 
-#include <iostream>
-
 int totalRectanglesY;
 int totalRectangles;
 SDL_Rect brick;
@@ -64,8 +62,7 @@ void initBrickImageType() {
 void showBricks(SDL_Renderer* renderer) {
 	for (int i = 0; i < totalRectangles; i++) {
 		if (brickLives[i] > 0) {
-			/*
-			switch (brickImageTypes[pos]) {
+			switch (brickImageTypes[i]) {
 			case 0:
 				loadImage(renderer, &brickTexture, "images/bricks/beach.jpg");
 				break;
@@ -96,9 +93,8 @@ void showBricks(SDL_Renderer* renderer) {
 			case 9:
 				loadImage(renderer, &brickTexture, "images/bricks/strawberry.jpg");
 				break;
-			}*/
-			SDL_RenderFillRect(renderer, &rectangles[i]);
-			//SDL_RenderCopy(renderer, brickTexture, NULL, &rectangles[pos]);
+			}
+			SDL_RenderCopy(renderer, brickTexture, NULL, &rectangles[i]);
 		}
 	}
 }

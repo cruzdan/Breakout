@@ -7,8 +7,6 @@
 #include "Capsule.h"
 #include "Image.h"
 
-#include <iostream>
-
 //board
 int boardWidth;
 

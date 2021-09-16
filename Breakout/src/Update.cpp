@@ -10,8 +10,6 @@
 #include "Capsule.h"
 #include "Delete.h"
 
-#include <iostream>
-
 //rect is the ball or the bullet
 bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	int posX, posY, pos;
@@ -77,8 +75,6 @@ bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, 
 		int pos = 0;
 		if (checkRectCollisionBrick(rect, &pos)) {
 
-			
-
 			Mix_PlayChannel(1, sound, 0);
 			score++;
 			brickLives[pos]--;
@@ -86,8 +82,7 @@ bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, 
 				checkBrickWithCapsule(pos);
 				actualBricks--;
 			}
-				
-			
+							
 			writeScore(renderer);
 			if (actualBricks < 1) {
 				nextLevel(renderer);

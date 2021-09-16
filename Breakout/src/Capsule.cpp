@@ -6,7 +6,6 @@
 #include "Update.h"
 #include "Delete.h"
 #include "Ball.h"
-
 #include <SDL_ttf.h>
 #include <string>
 
