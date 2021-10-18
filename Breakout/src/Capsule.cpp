@@ -2,21 +2,20 @@
 #include "Brick.h"
 #include "GlobalVariables.h"
 #include "Paddle.h"
-#include "iostream"
 #include "Update.h"
 #include "Delete.h"
 #include "Ball.h"
 #include <SDL_ttf.h>
 #include <string>
 
-int totalCapsules;//max capsules in level
+int totalCapsules;//capsules in level
 int *brickCapsuleIndex;
 int *powerUpType;//0 -> shoot, 1 -> extra ball
 int actualCapsules = 0;//capsules actives in game
 Capsule *capsules;
 int capsuleWidth;
 int capsuleHeight;
-int capsuleSpeed;
+float capsuleSpeed;
 
 //shoot
 const int maxBullets = 6;
@@ -24,9 +23,9 @@ int actualBullets = 0;
 SDL_Rect* bullets;
 int bulletWidth;
 int bulletHeight;
-int bulletSpeed;
-int shootTimer = 0;
-int timerNextBullet = 0;
+float bulletSpeed;
+float shootTimer = 0;
+float timerNextBullet = 0;
 bool paddleShoot = false;
 
 SDL_Texture* textShootTimer;
@@ -39,10 +38,10 @@ void initRandom() {
 void initCapsuleVariables(SDL_Renderer* renderer) {
 	capsuleWidth = SCREEN_WIDTH / 36;
 	capsuleHeight = SCREEN_HEIGHT / 144;
-	capsuleSpeed = SCREEN_HEIGHT / 240;
+	capsuleSpeed = SCREEN_HEIGHT / 3.0f;
 	bulletWidth = SCREEN_WIDTH / 72;
 	bulletHeight = SCREEN_HEIGHT / 72;
-	bulletSpeed = SCREEN_HEIGHT / 72;
+	bulletSpeed = SCREEN_HEIGHT * 60.0f / 72;
 
 	changeTextShootActiveText(0, renderer);
 }
@@ -136,32 +135,32 @@ void resizeBullets() {
 	}
 }
 
-void activateShoot(int seconds) {
+void activateShoot(float seconds) {
 	paddleShoot = true;
 	shootTimer += seconds;
 }
 
-void takeCapsule(int powerType, SDL_Renderer* renderer) {
+void takeCapsule(int powerType, SDL_Renderer* renderer, float deltaTime) {
 	switch (powerType) {
 	case 0:
-		activateShoot(3000);
-		changeTextShootActiveText(shootTimer / 1000, renderer);
+		activateShoot(3.0f);
+		changeTextShootActiveText((int)shootTimer, renderer);
 		break;
 	case 1:
-		adNewBall();
+		addNewBall();
 		break;
 	}
 }
 
-void updateCapsules(SDL_Renderer* renderer) {
+void updateCapsules(SDL_Renderer* renderer, float deltaTime) {
 	for (int i = actualCapsules - 1; i >= 0; i--) {
 		//move
-		capsules[i].rect.y += capsuleSpeed;
+		capsules[i].rect.y += (int)(capsuleSpeed * deltaTime);
 		
 		//check collision with paddle
 		if (capsules[i].rect.y + capsules[i].rect.h >= paddle.y && SDL_HasIntersection(&capsules[i].rect, &paddle)) {
 			//has intersection with paddle
-			takeCapsule(capsules[i].type, renderer);
+			takeCapsule(capsules[i].type, renderer, deltaTime);
 			deleteElementOfCapsuleArray(capsules, i, actualCapsules);
 			actualCapsules--;
 			continue;
@@ -208,9 +207,9 @@ void closeCapsule() {
 	SDL_DestroyTexture(textShootTimer);
 }
 
-void updateBullets(SDL_Renderer* renderer, int time) {
+void updateBullets(SDL_Renderer* renderer, float time) {
 	for (int i = actualBullets - 1; i >= 0; i--) {
-		bullets[i].y -= bulletSpeed;
+		bullets[i].y -= (int)(bulletSpeed * time);
 
 		//check collision with bricks
 		if (checkRectCollisionBricks(bullets[i], renderer, false, -1)) {
@@ -234,7 +233,7 @@ void updateBullets(SDL_Renderer* renderer, int time) {
 		}
 		else {
 			shootTimer -= time;
-			changeTextShootActiveText(shootTimer / 1000, renderer);
+			changeTextShootActiveText((int)shootTimer, renderer);
 		}
 		if (timerNextBullet > 0)
 			timerNextBullet -= time;
@@ -255,7 +254,7 @@ void showTextScore(SDL_Renderer* renderer) {
 void shoot() {
 	if (paddleShoot && timerNextBullet <= 0 && actualBullets < maxBullets - 1) {
 		
-		timerNextBullet = 300;
+		timerNextBullet = 0.3f;
 
 		//add 2 bullets on the paddle
 		bullets[actualBullets] = { 

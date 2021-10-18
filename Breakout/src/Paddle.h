@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL.h>
 extern SDL_Rect paddle;
-extern int paddleSpeed;
+extern float paddleSpeed;
 void centerPaddle();
 void movePaddleRight();
 void movePaddleLeft();
@@ -10,6 +10,6 @@ void setWindowPaddleCoordinates(int percentageX);
 void getActualPadddleCoordinates(int* x);
 void incrementPaddleSpeed();
 void decrementPaddleSpeed();
-void updatePaddle();
+void updatePaddle(float deltaTime);
 int getMultiplicatorPaddleSpeed();
 void setMultiplicatorPaddleSpeed(int paddleMultiplicator);

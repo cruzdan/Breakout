@@ -9,7 +9,7 @@ extern bool allCommands;
 
 void initCommandLine();
 void writeCommandLineText(SDL_Renderer* renderer, std::string text);
-void writeFPSText(SDL_Renderer* renderer);
+void writeFPSText(SDL_Renderer* renderer, int fps);
 void addWordToCommand(SDL_Renderer* renderer, int wordNumber);
 void showCommandLineText(SDL_Renderer* renderer);
 void closeCommand();

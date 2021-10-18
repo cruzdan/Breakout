@@ -26,7 +26,7 @@ void getActualRectCoordinates(int* x, int* y, SDL_Rect rect) {
 }
 
 //key of quit and resize window
-void generalKey(SDL_Event event, SDL_Renderer* renderer) {
+void generalKey(SDL_Event event, SDL_Renderer* renderer, int fps) {
 	if (event.type == SDL_QUIT) {
 		gameOver = true;
 	}
@@ -34,17 +34,19 @@ void generalKey(SDL_Event event, SDL_Renderer* renderer) {
 		//change the window size
 		int paddleX, paddleMultiplicator;
 		SDL_Point* ballPercentages = new SDL_Point[actualBalls];
-		SDL_Point* ballMultiplicator = new SDL_Point[actualBalls];
+		float* ballMulX = new float[actualBalls];
+		float* ballMulY = new float[actualBalls];
 		ballPercentages = getActualBallPercentages(ballPercentages);
 		getActualPadddleCoordinates(&paddleX);
-		ballMultiplicator = getBallSpeedMultiplicators(ballMultiplicator);
+		ballMulX = getBallSpeedMultiplicatorsX(ballMulX);
+		ballMulY = getBallSpeedMultiplicatorsY(ballMulY);
 		paddleMultiplicator = getMultiplicatorPaddleSpeed();
 		SDL_Point* capsulePercentages = new SDL_Point[actualCapsules];
 		capsulePercentages = getActualCapsulePercentages(capsulePercentages);
 		SDL_Point* bulletPercentages = new SDL_Point[actualBullets];
 		bulletPercentages = getActualBulletPercentages(bulletPercentages);
 
-		changeWindowGameSize(renderer);
+		changeWindowGameSize(renderer, fps);
 
 		setWindowPaddleCoordinates(paddleX);
 		for (int i = 0; i < actualBalls; i++) {
@@ -52,13 +54,14 @@ void generalKey(SDL_Event event, SDL_Renderer* renderer) {
 
 		}
 		reziseBalls();
-		setMultiplicatorBallSpeed(ballMultiplicator);
+		setMultiplicatorBallSpeed(ballMulX, ballMulY);
 		setMultiplicatorPaddleSpeed(paddleMultiplicator);
 		resizeCapsules(); 
 		for (int i = 0; i < actualCapsules; i++) {
 			capsules[i].rect = setWindowRectCoordinates(capsulePercentages[i].x, capsulePercentages[i].y, capsules[i].rect);
 		}
-		delete[] ballMultiplicator;
+		delete[] ballMulX;
+		delete[] ballMulY;
 		delete[] capsulePercentages;
 		delete[] ballPercentages;
 		resizeBullets();
@@ -69,11 +72,11 @@ void generalKey(SDL_Event event, SDL_Renderer* renderer) {
 	}
 }
 
-void detectGameKey(SDL_Renderer* renderer) {
+void detectGameKey(SDL_Renderer* renderer, int fps) {
 	SDL_Event event;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	while (SDL_PollEvent(&event)) {
-		generalKey(event, renderer);
+		generalKey(event, renderer, fps);
 		if (event.type == SDL_KEYDOWN) {
 			if (commandLine) {
 				if (keys[SDL_SCANCODE_H]) 
@@ -110,11 +113,11 @@ void detectGameKey(SDL_Renderer* renderer) {
 	}
 }
 
-void detectPauseKey(SDL_Renderer* renderer) {
+void detectPauseKey(SDL_Renderer* renderer, int fps) {
 	SDL_Event event;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	while (SDL_PollEvent(&event)) {
-		generalKey(event, renderer);
+		generalKey(event, renderer, fps);
 		if (event.type == SDL_KEYDOWN) {
 			if (commandLine) {
 				if (keys[SDL_SCANCODE_H])
@@ -174,20 +177,27 @@ void detectPauseKey(SDL_Renderer* renderer) {
 						break;
 					case 3:
 						int paddleX;
-						SDL_Point* ballMultiplicator = new SDL_Point[actualBalls];
+						//SDL_Point* ballMultiplicator = new SDL_Point[actualBalls];
+						float* ballMulX = new float[actualBalls];
+						float* ballMulY = new float[actualBalls];
 						getActualPadddleCoordinates(&paddleX);
 						SDL_Point* ballPercentages = new SDL_Point[actualBalls];
 						ballPercentages = getActualBallPercentages(ballPercentages);
-						ballMultiplicator = getBallSpeedMultiplicators(ballMultiplicator);
+						ballMulX = getBallSpeedMultiplicatorsX(ballMulX);
+						ballMulY = getBallSpeedMultiplicatorsY(ballMulY);
+						//ballMultiplicator = getBallSpeedMultiplicators(ballMultiplicator);
 						fullscreenOnOff(renderer);
-						changeFullscreenGameSize(renderer);
+						changeFullscreenGameSize(renderer, fps);
 						setWindowPaddleCoordinates(paddleX);
 						for (int i = 0; i < actualBalls; i++) {
 							ballRect[i] = setWindowRectCoordinates(ballPercentages[i].x, ballPercentages[i].y, ballRect[i]);
 						}
 						reziseBalls();
-						setMultiplicatorBallSpeed(ballMultiplicator);
-						delete[] ballMultiplicator;
+						setMultiplicatorBallSpeed(ballMulX, ballMulY);
+						//setMultiplicatorBallSpeed(ballMultiplicator);
+						//delete[] ballMultiplicator;
+						delete[] ballMulX;
+						delete[] ballMulY;
 						delete[] ballPercentages;
 						break;
 					}

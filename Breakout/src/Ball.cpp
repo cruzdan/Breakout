@@ -10,13 +10,13 @@ const int maxBalls = 8;
 int actualBalls = 1;
 SDL_Rect* ballRect;
 SDL_Texture* ballTexture;
-int* ballSpeedX;
-int* ballSpeedY;
-int ballSpeedChangeX;
-int ballSPeedChangeY;
-int maxBallSpeed;
-int firstSpeedChangeX;
-int firstSpeedChangeY;
+float* ballSpeedX;
+float* ballSpeedY;
+float ballSpeedChangeX;
+float ballSPeedChangeY;
+float maxBallSpeed;
+float firstSpeedChangeX;
+float firstSpeedChangeY;
 
 void centerBall(int ballIndex) {
 	ballRect[ballIndex].x = paddle.x + paddle.w / 2 - ballRect[ballIndex].w / 2;
@@ -38,7 +38,7 @@ void initBallSpeed(int ballIndex) {
 	ballSpeedY[ballIndex] = -(ballSPeedChangeY + ballSPeedChangeY);
 }
 
-void adNewBall() {
+void addNewBall() {
 	if (actualBalls < maxBalls) {
 		centerBall(actualBalls);
 		initBallSpeed(actualBalls);
@@ -48,24 +48,24 @@ void adNewBall() {
 
 void initBall() {
 	ballRect = new SDL_Rect[maxBalls];
-	ballSpeedX = new int[maxBalls];
-	ballSpeedY = new int[maxBalls];
+	ballSpeedX = new float[maxBalls];
+	ballSpeedY = new float[maxBalls];
 	for (int i = 0; i < maxBalls; i++) {
 		ballRect[i].w = boardWidth / 40;
 		ballRect[i].h = SCREEN_HEIGHT / 30;
 	}
 
-	ballSpeedChangeX = SCREEN_WIDTH / 256;
-	ballSPeedChangeY = SCREEN_HEIGHT / 144;
+	ballSpeedChangeX = (SCREEN_WIDTH * 50.0f / 256);
+	ballSPeedChangeY = (SCREEN_HEIGHT * 50.0f / 144);
 
-	firstSpeedChangeX = ballSpeedChangeX / 2;
-	firstSpeedChangeY = ballSPeedChangeY / 2;
+	firstSpeedChangeX = ballSpeedChangeX / 2.0f;
+	firstSpeedChangeY = ballSPeedChangeY / 2.0f;
 
 	initBallSpeed(0);
 	ballRect[0].x = boardWidth / 2 - ballRect[0].w / 2;
 	ballRect[0].y = paddle.y - ballRect[0].h;
 
-	maxBallSpeed = ballSpeedChangeX * 4;
+	maxBallSpeed = ballSpeedChangeX * 5.0f;
 }
 
 SDL_Point* getActualBallPercentages(SDL_Point* percentages) {
@@ -109,8 +109,8 @@ void showBalls(SDL_Renderer* renderer) {
 void incrementBallSpeed() {
 	SDL_Point* speedMultiplies = new SDL_Point[actualBalls];
 	for (int i = 0; i < actualBalls; i++) {
-		speedMultiplies[i].x = ballSpeedX[i] / ballSpeedChangeX;
-		speedMultiplies[i].y = ballSpeedY[i] / ballSPeedChangeY;
+		speedMultiplies[i].x = (int)(ballSpeedX[i] / ballSpeedChangeX);
+		speedMultiplies[i].y = (int)(ballSpeedY[i] / ballSPeedChangeY);
 	}
 	ballSpeedChangeX += firstSpeedChangeX;
 	ballSPeedChangeY += firstSpeedChangeY;
@@ -124,8 +124,8 @@ void incrementBallSpeed() {
 void decrementBallSpeed() {
 	SDL_Point* speedMultiplies = new SDL_Point[actualBalls];
 	for (int i = 0; i < actualBalls; i++) {
-		speedMultiplies[i].x = ballSpeedX[i] / ballSpeedChangeX;
-		speedMultiplies[i].y = ballSpeedY[i] / ballSPeedChangeY;
+		speedMultiplies[i].x = (int)(ballSpeedX[i] / ballSpeedChangeX);
+		speedMultiplies[i].y = (int)(ballSpeedY[i] / ballSPeedChangeY);
 	}
 	if (ballSpeedChangeX - firstSpeedChangeX > 0 && ballSPeedChangeY - firstSpeedChangeY > 0) {
 		ballSpeedChangeX -= firstSpeedChangeX;
@@ -141,10 +141,35 @@ void decrementBallSpeed() {
 //get the actual ball speed in termns of ballSpeedChangeX and ballSPeedChangeY
 SDL_Point* getBallSpeedMultiplicators(SDL_Point* ballMultiplicator) {
 	for (int i = 0; i < actualBalls; i++) {
-		ballMultiplicator[i].x = ballSpeedX[i] / ballSpeedChangeX;
-		ballMultiplicator[i].y = ballSpeedY[i] / ballSPeedChangeY;
+		ballMultiplicator[i].x = (int)(ballSpeedX[i] / ballSpeedChangeX);
+		ballMultiplicator[i].y = (int)(ballSpeedY[i] / ballSPeedChangeY);
 	}
 	return ballMultiplicator;
+}
+
+//get the actual ball speed in termns of Width and height
+float* getBallSpeedMultiplicatorsX(float* ballMultiplicatorX) {
+	for (int i = 0; i < actualBalls; i++) {
+		ballMultiplicatorX[i] = ballSpeedX[i] / (float)SCREEN_WIDTH;
+	}
+	return ballMultiplicatorX;
+}
+
+float* getBallSpeedMultiplicatorsY(float* ballMultiplicatorY) {
+	for (int i = 0; i < actualBalls; i++) {
+		ballMultiplicatorY[i] = ballSpeedY[i] / (float)SCREEN_HEIGHT;
+	}
+	return ballMultiplicatorY;
+}
+
+
+
+//set the paddleSpeed in a multiplicator of width and height
+void setMultiplicatorBallSpeed(float* ballMultiplicatorX, float* ballMultiplicatorY) {
+	for (int i = 0; i < actualBalls; i++) {
+		ballSpeedX[i] = ballMultiplicatorX[i] * SCREEN_WIDTH;
+		ballSpeedY[i] = ballMultiplicatorY[i] * SCREEN_HEIGHT;
+	}
 }
 
 //set the paddleSpeed in a multiplicator of ballSPeedChange

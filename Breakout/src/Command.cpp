@@ -2,7 +2,6 @@
 #include <string>
 #include <SDL_ttf.h>
 #include "GlobalVariables.h"
-#include "FPS.h"
 #include "Menu.h"
 #include "Paddle.h"
 #include "Ball.h"
@@ -67,7 +66,6 @@ void initCommandLine() {
 		commandRects[i].y = commandMenuRect.y + i * commandLineRect.h;
 		commandRects[i].h = commandLineRect.h;
 	}
-	
 }
 
 void showAllCommands(SDL_Renderer* renderer) {
@@ -88,7 +86,6 @@ void writeAllCommands(SDL_Renderer* renderer) {
 		commandTextures[i] = SDL_CreateTextureFromSurface(renderer, textSurface);
 		commandRects[i].w = textSurface->w;
 	}
-	
 
 	SDL_FreeSurface(textSurface);
 	textSurface = nullptr;
@@ -112,7 +109,7 @@ void writeCommandLineText(SDL_Renderer* renderer, std::string text) {
 	TTF_CloseFont(font);
 }
 
-void writeFPSText(SDL_Renderer* renderer) {
+void writeFPSText(SDL_Renderer* renderer, int fps) {
 	SDL_Color color = { 36,144,98 };
 	TTF_Font* font = TTF_OpenFont("fonts/OpenSans-Bold.ttf", fpsTextRect.h);
 	SDL_Surface* textSurface;

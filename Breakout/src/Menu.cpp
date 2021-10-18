@@ -56,7 +56,7 @@ SDL_Texture* textStart;
 SDL_Rect startRect;
 
 bool serve = true;
-int timer = 0;
+float timer = 0;
 
 //assign the coordinates, width and height on the middle of the menuX
 void assignProperties(SDL_Rect* rect, int y, int w, int h) {
@@ -266,9 +266,9 @@ void showPauseMenu(SDL_Renderer* renderer) {
 	}
 }
 
-void start(int time) {
+void start(float time) {
 	timer += time;
-	if (timer >= 3000) {
+	if (timer >= 3.0f) {
 		timer = 0;
 		serve = false;
 	}
@@ -278,7 +278,7 @@ void countStart(SDL_Renderer* renderer) {
 	TTF_Font* font = TTF_OpenFont("fonts/Oswald-Stencil.ttf", SCREEN_HEIGHT / 15);
 	SDL_Surface* textSurface;
 	char c[4];
-	int m = timer / 1000 + 1;
+	int m = (int)timer + 1;
 	SDL_itoa(m, c, 10);
 	textSurface = TTF_RenderText_Solid(font, c, color);
 	textStart = SDL_CreateTextureFromSurface(renderer, textSurface);
@@ -481,7 +481,7 @@ void changeMusicRects(SDL_Renderer* renderer, int activeMusicRects) {
 	}
 }
 
-void changeWindowGameSize(SDL_Renderer* renderer) {
+void changeWindowGameSize(SDL_Renderer* renderer, int fps) {
 	extern SDL_Window* window;
 	int screenWidth;
 	int screenHeight;
@@ -497,10 +497,10 @@ void changeWindowGameSize(SDL_Renderer* renderer) {
 	writeScore(renderer);
 	writeCommandLineText(renderer, command);
 	writeAllCommands(renderer);
-	writeFPSText(renderer);
+	writeFPSText(renderer, fps);
 }
 
-void changeFullscreenGameSize(SDL_Renderer* renderer) {
+void changeFullscreenGameSize(SDL_Renderer* renderer, int fps) {
 	if (fullscreen) {
 		extern SDL_Window* window;
 		SDL_DisplayMode DM;
@@ -522,7 +522,7 @@ void changeFullscreenGameSize(SDL_Renderer* renderer) {
 	else {
 		extern SDL_Window* window;
 		SDL_SetWindowFullscreen(window, 0);
-		changeWindowGameSize(renderer);
+		changeWindowGameSize(renderer, fps);
 	}
 }
 

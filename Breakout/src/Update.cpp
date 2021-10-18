@@ -96,11 +96,11 @@ bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, 
 	return false;
 }
 
-void update(SDL_Renderer* renderer, int time) {
+void update(SDL_Renderer* renderer, float time) {
 	for (int i = 0; i < actualBalls; i++) {
-		int xI = ballRect[i].x + ballSpeedX[i];
-		int xF = xI + ballRect[i].w;
-		int yI = ballRect[i].y + ballSpeedY[i];
+		int xI = (int)(ballRect[i].x + ballSpeedX[i] * time);
+		int xF = (int)(xI + ballRect[i].w);
+		int yI = (int)(ballRect[i].y + ballSpeedY[i] * time);
 		int yF = yI + ballRect[i].h;
 		if (xI < 0 || xF > boardWidth) {
 			ballSpeedX[i] = -ballSpeedX[i];
@@ -129,30 +129,32 @@ void update(SDL_Renderer* renderer, int time) {
 			}
 			else {
 				//delete a ball
+				
 				deleteElementOfRectArray(ballRect, i, actualBalls);
-				deleteElementOfIntArray(ballSpeedX, i, actualBalls);
-				deleteElementOfIntArray(ballSpeedY, i, actualBalls);
+				deleteElementOfFloatArray(ballSpeedX, i, actualBalls);
+				deleteElementOfFloatArray(ballSpeedY, i, actualBalls);
 				actualBalls--;
+				break;
 			}
 		}
 		
 		if (SDL_HasIntersection(&ballRect[i], &paddle)) {
 			Mix_PlayChannel(1, sound, 0);
-			ballSpeedY[i] = -abs(ballSpeedY[i]);
+			ballSpeedY[i] = (float)(-abs((long)ballSpeedY[i]));
 			
 			if (xF < paddle.x + paddle.w / 3) {
-				if (ballSpeedX[i] - ballSpeedChangeX > -maxBallSpeed)
-					ballSpeedX[i] -= ballSpeedChangeX;
+				if (ballSpeedX[i] - ballSpeedChangeX / 2 > -maxBallSpeed)
+					ballSpeedX[i] -= ballSpeedChangeX / 2;
 			}
 			else if (xF > paddle.x + 2 * paddle.w / 3)
-				if (ballSpeedX[i] + ballSpeedChangeX < maxBallSpeed)
-					ballSpeedX[i] += ballSpeedChangeX;
+				if (ballSpeedX[i] + ballSpeedChangeX / 2 < maxBallSpeed)
+					ballSpeedX[i] += ballSpeedChangeX / 2;
 		}
-		ballRect[i].x += ballSpeedX[i];
-		ballRect[i].y += ballSpeedY[i];
+		ballRect[i].x = xI;
+		ballRect[i].y = yI;
 		checkRectCollisionBricks(ballRect[i], renderer, true, i);
 	}
-	updatePaddle();
-	updateCapsules(renderer);
+	updatePaddle(time);
+	updateCapsules(renderer, time);
 	updateBullets(renderer, time);
 }

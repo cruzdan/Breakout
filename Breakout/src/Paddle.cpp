@@ -1,13 +1,14 @@
 #include <SDL.h>
 #include "GlobalVariables.h"
 #include "Menu.h"
+
 SDL_Rect paddle;
-int paddleSpeed, maxSpeed, changeSpeed;
+float paddleSpeed, maxSpeed, changeSpeed;
 
 void initPaddle() {
 	paddleSpeed = 0;
-	maxSpeed = (SCREEN_WIDTH / 72) * 5;
-	changeSpeed = SCREEN_WIDTH / 288;
+	maxSpeed = (SCREEN_WIDTH / 72) * 5 * 60.0f;
+	changeSpeed = SCREEN_WIDTH * 25.0f / 288;
 
 	paddle.w = boardWidth / 2;
 	paddle.h = SCREEN_HEIGHT / 60;
@@ -20,34 +21,40 @@ void centerPaddle() {
 }
 
 void movePaddleRight() {
-	if (paddleSpeed + changeSpeed < maxSpeed) 
+	if (paddleSpeed + changeSpeed < maxSpeed)
 		paddleSpeed += changeSpeed;
 	else
 		paddleSpeed = 0;
 }
 
 void movePaddleLeft() {
-	if (paddleSpeed - changeSpeed > -maxSpeed) 
+	if (paddleSpeed - changeSpeed > -maxSpeed)
 		paddleSpeed -= changeSpeed;
 	else
 		paddleSpeed = 0;
 }
 
-void updatePaddle() {
+void updatePaddle(float deltaTime) {
 	//move paddle
 	if (paddleSpeed > 0) {
-		if (paddle.x + paddle.w + paddleSpeed <= boardWidth) {
-			paddle.x += paddleSpeed;
+		if (paddle.x + paddle.w + paddleSpeed * deltaTime <= boardWidth) {
+			paddle.x += (int)(paddleSpeed * deltaTime);
 			//doww speed paddle
-			paddleSpeed -= changeSpeed / 2;
+			if (paddleSpeed - changeSpeed / 2 > 0)
+				paddleSpeed -= changeSpeed / 2;
+			else
+				paddleSpeed = 0;
 		}
 		else
 			paddleSpeed = 0;
 	}
 	else if (paddleSpeed != 0){
-		if (paddle.x + paddleSpeed > 0) {
-			paddle.x += paddleSpeed;
-			paddleSpeed += changeSpeed / 2;
+		if (paddle.x + paddleSpeed * deltaTime > 0) {
+			paddle.x += (int)(paddleSpeed * deltaTime);
+			if (paddleSpeed + changeSpeed / 2 < 0)
+				paddleSpeed += changeSpeed / 2;
+			else
+				paddleSpeed = 0;
 		}
 		else
 			paddleSpeed = 0;
@@ -67,7 +74,7 @@ void getActualPadddleCoordinates(int* x) {
 
 //get the actual speed paddle in termns of changeSpeed
 int getMultiplicatorPaddleSpeed() {
-	return (paddleSpeed / changeSpeed);
+	return (int)(paddleSpeed / changeSpeed);
 }
 
 //set the speed paddle in a multiplicator of changeSpeed
@@ -76,7 +83,7 @@ void setMultiplicatorPaddleSpeed(int paddleMultiplicator) {
 }
 
 void incrementPaddleSpeed() {
-	changeSpeed += SCREEN_WIDTH / 288;
+	changeSpeed += SCREEN_WIDTH * 60 / 288;
 }
 
 void decrementPaddleSpeed() {
