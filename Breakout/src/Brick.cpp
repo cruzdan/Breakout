@@ -1,90 +1,99 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include "Menu.h"
 #include "Brick.h"
-#include "GlobalVariables.h"
 #include <stdlib.h>
-#include "Image.h"
+#include "Render.h"
+#include <vector>
 
 int totalRectanglesY;
 int totalRectangles;
-SDL_Rect brick;
 int freeSizeX;//space between two bricks in x position
 int freeSizeY;//space between two bricks in y position
 int lastBrickY;//the last pixel in y of the bricks
 int initialBrickY;//the first pixel in y of the bricks
-SDL_Rect* rectangles;// bricks on the board
-int* brickLives; //indicates the lives of the bricks
-int* brickImageTypes;//indicates the type of image of the bricks
+std::vector<class Brick*> bricks; // bricks on game
 int actualBricks;
-
 SDL_Texture* brickTexture[10];
 
 void initBrickTextures(SDL_Renderer* renderer) {
-	loadImage(renderer, &brickTexture[0], "images/bricks/beach.jpg");
-	loadImage(renderer, &brickTexture[1], "images/bricks/bulb.jpg");
-	loadImage(renderer, &brickTexture[2], "images/bricks/drop.jpg");
-	loadImage(renderer, &brickTexture[3], "images/bricks/drop-of-water.jpg");
-	loadImage(renderer, &brickTexture[4], "images/bricks/earth.jpg");
-	loadImage(renderer, &brickTexture[5], "images/bricks/green.jpg");
-	loadImage(renderer, &brickTexture[6], "images/bricks/lava.jpg");
-	loadImage(renderer, &brickTexture[7], "images/bricks/sand.jpg");
-	loadImage(renderer, &brickTexture[8], "images/bricks/steelwool.jpg");
-	loadImage(renderer, &brickTexture[9], "images/bricks/strawberry.jpg");
+	loadImage(renderer, "images/bricks/beach.jpg", &brickTexture[0]);
+	loadImage(renderer, "images/bricks/bulb.jpg", &brickTexture[1]);
+	loadImage(renderer, "images/bricks/drop.jpg", &brickTexture[2]);
+	loadImage(renderer, "images/bricks/drop-of-water.jpg", &brickTexture[3]);
+	loadImage(renderer, "images/bricks/earth.jpg", &brickTexture[4]);
+	loadImage(renderer, "images/bricks/green.jpg", &brickTexture[5]);
+	loadImage(renderer, "images/bricks/lava.jpg", &brickTexture[6]);
+	loadImage(renderer, "images/bricks/sand.jpg", &brickTexture[7]);
+	loadImage(renderer, "images/bricks/steelwool.jpg", &brickTexture[8]);
+	loadImage(renderer, "images/bricks/strawberry.jpg", &brickTexture[9]);
 }
 
-void initBrickRows() {
-	totalRectanglesY = level + rand() % 5;
-	totalRectangles = totalRectanglesX * totalRectanglesY;
-	rectangles = new SDL_Rect[totalRectangles];
-	brickLives = new int[totalRectangles];
-	brickImageTypes = new int[totalRectangles];
-}
+void resizeBricks() {
+	int width = boardWidth / (totalRectanglesX + 1);
+	int height = (int)(getScreenHeight() * 0.01777);
+	freeSizeX = width / (totalRectanglesX + 1);
+	freeSizeY = getScreenHeight() / 240;
+	initialBrickY = (int)(getScreenHeight() * 0.19555);
 
-void initBrickLives() {
-	actualBricks = totalRectangles;
-	for (int i = 0; i < actualBricks; i++) {
-		brickLives[i] = 1 + rand() % 2;
+	int pos = 0;
+	for (int j = 0; j < totalRectanglesY; j++) {
+		for (int i = 0; i < totalRectanglesX; i++) {
+			pos = i + j * totalRectanglesX;
+			bricks.at(pos)->setX((float)(i * width + (i + 1) * freeSizeX));
+			bricks.at(pos)->setY((float)(j * height + (j + 1) * freeSizeY + initialBrickY));
+			bricks.at(pos)->setW(width);
+			bricks.at(pos)->setH(height);
+		}
 	}
+	lastBrickY = (int)(bricks.at(pos)->getY() + height);
 }
 
 //assign the rectangle size and add them to rectangles
 void createRectangles() {
-	brick.w = boardWidth / (totalRectanglesX + 1);
-	brick.h = (int)(SCREEN_HEIGHT * 0.01777);
-	freeSizeX = brick.w / (totalRectanglesX + 1);
-	freeSizeY = SCREEN_HEIGHT / 240;
-	initialBrickY = (int)(SCREEN_HEIGHT * 0.19555);
-	int pos;
+	totalRectanglesY = level + rand() % 5;
+	totalRectangles = totalRectanglesX * totalRectanglesY;
+	actualBricks = totalRectangles;
+	bricks.clear();
+	Brick brick;
+	brick.setW(boardWidth / (totalRectanglesX + 1));
+	brick.setH((int)(getScreenHeight() * 0.01777));
+	freeSizeX = brick.getW() / (totalRectanglesX + 1);
+	freeSizeY = getScreenHeight() / 240;
+	initialBrickY = (int)(getScreenHeight() * 0.19555);
+	int pos = 0;
 	for (int j = 0; j < totalRectanglesY; j++) {
 		for (int i = 0; i < totalRectanglesX; i++) {
 			pos = i + j * totalRectanglesX;
-			brick.x = i * brick.w + (i + 1) * freeSizeX;
-			brick.y = j * brick.h + (j + 1) * freeSizeY + initialBrickY;
-			rectangles[pos] = brick;
+			brick.setX((float)(i * brick.getW() + (i + 1) * freeSizeX));
+			brick.setY((float)(j * brick.getH() + (j + 1) * freeSizeY + initialBrickY));
+			brick.setIndex(pos);
+			brick.setLifes(1 + rand() % 2);
+			brick.setType(rand() % 10);
+			bricks.push_back(new Brick(brick));
 		}
 	}
-	lastBrickY = rectangles[pos].y + rectangles[pos].h;
-}
-
-void initBrickImageType() {
-	for (int i = 0; i < actualBricks; i++) {
-		brickImageTypes[i] = rand() % 10;
-	}
+	lastBrickY = (int)(bricks.at(pos)->getY() + bricks.at(pos)->getH());
 }
 
 void showBricks(SDL_Renderer* renderer) {
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
 	for (int i = 0; i < totalRectangles; i++) {
-		if (brickLives[i] > 0) {
-			SDL_RenderCopy(renderer, brickTexture[brickImageTypes[i]], NULL, &rectangles[i]);
+		if (bricks.at(i)->getLifes() > 0) {
+			SDL_Rect rect;
+			rect.x = (int)bricks.at(i)->getX();
+			rect.y = (int)bricks.at(i)->getY();
+			rect.w = bricks.at(i)->getW();
+			rect.h = bricks.at(i)->getH();
+			SDL_RenderCopy(renderer, brickTexture[bricks.at(i)->getType()], NULL, &rect);
+			SDL_RenderDrawRect(renderer, &rect);
 		}
 	}
 }
 
-
 void closeBrick() {
-	for(int i = 0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 		SDL_DestroyTexture(brickTexture[i]);
-	delete[] rectangles;
-	delete[] brickLives;
-	delete[] brickImageTypes;
 }

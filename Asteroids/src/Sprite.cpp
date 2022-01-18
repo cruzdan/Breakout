@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Sprite.h"
 #include "SDL_image.h"
 #include <iostream>
@@ -24,7 +27,7 @@ SDL_Texture* instruction3Texture;
 SDL_Texture* instruction4Texture;
 
 void loadImage(SDL_Renderer* renderer) {
-	SDL_Surface* image;
+	SDL_Surface* image = 0;
 
 	image = IMG_Load("images/background.png");
 	if (!image) {
@@ -42,20 +45,19 @@ void loadImage(SDL_Renderer* renderer) {
 	if (!image) {
 		std::cout << "failed in load rocket image" << std::endl;
 	}
-	SDL_SetColorKey(image, SDL_TRUE, SDL_MapRGB(image->format, 255, 255, 255));
-	rocketTexture = SDL_CreateTextureFromSurface(renderer, image);
+	else {
+		SDL_SetColorKey(image, SDL_TRUE, SDL_MapRGB(image->format, 255, 255, 255));
+		rocketTexture = SDL_CreateTextureFromSurface(renderer, image);
+	}
 
 	image = IMG_Load("images/asteroid.png");
 	if (!image) {
 		std::cout << "failed in load asteroid image" << std::endl;
 	}
-	SDL_SetColorKey(image, SDL_TRUE, SDL_MapRGB(image->format, 255, 255, 255));
 	asteroidTexture = SDL_CreateTextureFromSurface(renderer, image);
 
 	SDL_FreeSurface(image);
 }
-
-
 
 void closeSprite() {
 	SDL_DestroyTexture(backgroundTexture);

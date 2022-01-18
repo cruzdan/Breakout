@@ -1,7 +1,9 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include "Paddle.h"
 #include "Menu.h"
-#include "GlobalVariables.h"
 #include "Ball.h"
 #include "Brick.h"
 #include "Command.h"
@@ -14,7 +16,7 @@ void show(SDL_Renderer* renderer) {
 	if (menuIndex == 0) {
 		showBackgroundImage(renderer);
 		SDL_RenderFillRect(renderer, &paddle);
-		SDL_RenderDrawLine(renderer, boardWidth, 0, boardWidth, SCREEN_HEIGHT);
+		SDL_RenderDrawLine(renderer, boardWidth, 0, boardWidth, getScreenHeight());
 		showGameMenu(renderer);
 		if (serve) {
 			SDL_RenderCopy(renderer, textStart, NULL, &startRect);
@@ -34,8 +36,9 @@ void show(SDL_Renderer* renderer) {
 		SDL_SetRenderDrawColor(renderer, 105, 105, 105, 0);
 		SDL_RenderFillRect(renderer, &commandLineRect);
 		showCommandLineText(renderer);
-		if(allCommands)
+		if (allCommands) {
 			showAllCommands(renderer);
+		}
 	}
 	if (fpsActive) {
 		showFPSText(renderer);

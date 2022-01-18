@@ -181,33 +181,30 @@
     <ClCompile Include="src\Close.cpp" />
     <ClCompile Include="src\Command.cpp" />
     <ClCompile Include="src\Delete.cpp" />
-    <ClCompile Include="src\GlobalVariables.cpp" />
-    <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\Init.cpp" />
     <ClCompile Include="src\Key.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\Music.cpp" />
     <ClCompile Include="src\Paddle.cpp" />
+    <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\Restart.cpp" />
     <ClCompile Include="src\Show.cpp" />
     <ClCompile Include="src\Update.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GlobalVariables.h" />
     <ClInclude Include="src\Ball.h" />
     <ClInclude Include="src\Brick.h" />
     <ClInclude Include="src\Capsule.h" />
     <ClInclude Include="src\Close.h" />
     <ClInclude Include="src\Command.h" />
     <ClInclude Include="src\Delete.h" />
-    <ClInclude Include="src\GlobalVariables.h" />
-    <ClInclude Include="src\Image.h" />
     <ClInclude Include="src\Init.h" />
     <ClInclude Include="src\Key.h" />
     <ClInclude Include="src\Menu.h" />
     <ClInclude Include="src\Music.h" />
     <ClInclude Include="src\Paddle.h" />
+    <ClInclude Include="src\Render.h" />
     <ClInclude Include="src\Restart.h" />
     <ClInclude Include="src\Show.h" />
     <ClInclude Include="src\Update.h" />

@@ -1,7 +1,9 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include "Paddle.h"
 #include "Restart.h"
-#include "GlobalVariables.h"
 #include "Menu.h"
 #include "Ball.h"
 #include "Update.h"
@@ -11,22 +13,27 @@
 bool gameOver = false;
 
 //put the rect in the x and y percentage of the screen
-SDL_Rect setWindowRectCoordinates(int percentageX, int percentageY, SDL_Rect rect) {
-	rect.x = (percentageX * SCREEN_WIDTH) / 100 - rect.w / 2;
-	rect.y = (percentageY * SCREEN_HEIGHT) / 100 - rect.h / 2;
-	return rect;
+void setWindowRectCoordinates(int percentageX, int percentageY, SDL_Rect* rect) {
+	rect->x = (percentageX * getScreenWidth()) / 100 - rect->w / 2;
+	rect->y = (percentageY * getScreenHeight()) / 100 - rect->h / 2;
+}
+
+//put the rect in the x and y percentage of the screen
+void setWindowRectCoordinates(int percentageX, int percentageY, int* x, int* y, int w, int h) {
+	*x = (percentageX * getScreenWidth()) / 100 - w / 2;
+	*y = (percentageY * getScreenHeight()) / 100 - h / 2;
 }
 
 //get the coordinates in percentage of the screen of the rect(center) in x,y
 void getActualRectCoordinates(int* x, int* y, SDL_Rect rect) {
 	int centerRectX = rect.x + rect.w / 2;
 	int centerRectY = rect.y + rect.h / 2;
-	*x = 100 * centerRectX / SCREEN_WIDTH;
-	*y = 100 * centerRectY / SCREEN_HEIGHT;
+	*x = 100 * centerRectX / getScreenWidth();
+	*y = 100 * centerRectY / getScreenHeight();
 }
 
 //key of quit and resize window
-void generalKey(SDL_Event event, SDL_Renderer* renderer, int fps) {
+void generalKey(SDL_Event event, SDL_Renderer* renderer, int fps, SDL_Window* window) {
 	if (event.type == SDL_QUIT) {
 		gameOver = true;
 	}
@@ -46,19 +53,28 @@ void generalKey(SDL_Event event, SDL_Renderer* renderer, int fps) {
 		SDL_Point* bulletPercentages = new SDL_Point[actualBullets];
 		bulletPercentages = getActualBulletPercentages(bulletPercentages);
 
-		changeWindowGameSize(renderer, fps);
-
+		changeWindowGameSize(renderer, fps, window);
 		setWindowPaddleCoordinates(paddleX);
-		for (int i = 0; i < actualBalls; i++) {
-			ballRect[i] = setWindowRectCoordinates(ballPercentages[i].x, ballPercentages[i].y, ballRect[i]);
-
-		}
 		reziseBalls();
+		int i = 0;
+		for (auto ball : balls) {
+			int x;
+			int y;
+			setWindowRectCoordinates(ballPercentages[i].x, ballPercentages[i].y, &x, &y, ball->getWidth(), ball->getHeight());
+			ball->setX((float)x);
+			ball->setY((float)y);
+			i++;
+		}
+
 		setMultiplicatorBallSpeed(ballMulX, ballMulY);
 		setMultiplicatorPaddleSpeed(paddleMultiplicator);
-		resizeCapsules(); 
+		resizeCapsules();
 		for (int i = 0; i < actualCapsules; i++) {
-			capsules[i].rect = setWindowRectCoordinates(capsulePercentages[i].x, capsulePercentages[i].y, capsules[i].rect);
+			int x;
+			int y;
+			setWindowRectCoordinates(capsulePercentages[i].x, capsulePercentages[i].y, &x, &y, capsules.at(i)->getWidth(), capsules.at(i)->getHeight());
+			capsules.at(i)->setX((float)x);
+			capsules.at(i)->setY((float)y);
 		}
 		delete[] ballMulX;
 		delete[] ballMulY;
@@ -66,20 +82,24 @@ void generalKey(SDL_Event event, SDL_Renderer* renderer, int fps) {
 		delete[] ballPercentages;
 		resizeBullets();
 		for (int i = 0; i < actualBullets; i++) {
-			bullets[i] = setWindowRectCoordinates(bulletPercentages[i].x, bulletPercentages[i].y, bullets[i]);
+			int x;
+			int y;
+			setWindowRectCoordinates(bulletPercentages[i].x, bulletPercentages[i].y, &x, &y, bullets.at(i)->getW(), bullets.at(i)->getH());
+			bullets.at(i)->setX((float)x);
+			bullets.at(i)->setY((float)y);
 		}
 		delete[] bulletPercentages;
 	}
 }
 
-void detectGameKey(SDL_Renderer* renderer, int fps) {
+void detectGameKey(SDL_Renderer* renderer, int fps, SDL_Window* window) {
 	SDL_Event event;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	while (SDL_PollEvent(&event)) {
-		generalKey(event, renderer, fps);
+		generalKey(event, renderer, fps, window);
 		if (event.type == SDL_KEYDOWN) {
 			if (commandLine) {
-				if (keys[SDL_SCANCODE_H]) 
+				if (keys[SDL_SCANCODE_H])
 					allCommands = !allCommands;
 				else
 					addWordToCommand(renderer, event.key.keysym.scancode);
@@ -113,11 +133,11 @@ void detectGameKey(SDL_Renderer* renderer, int fps) {
 	}
 }
 
-void detectPauseKey(SDL_Renderer* renderer, int fps) {
+void detectPauseKey(SDL_Renderer* renderer, int fps, SDL_Window* window) {
 	SDL_Event event;
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	while (SDL_PollEvent(&event)) {
-		generalKey(event, renderer, fps);
+		generalKey(event, renderer, fps, window);
 		if (event.type == SDL_KEYDOWN) {
 			if (commandLine) {
 				if (keys[SDL_SCANCODE_H])
@@ -137,7 +157,7 @@ void detectPauseKey(SDL_Renderer* renderer, int fps) {
 				command = "";
 				writeCommandLineText(renderer, command);
 				allCommands = false;
-			}	
+			}
 		}
 		if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
 			int mouseX;
@@ -177,7 +197,6 @@ void detectPauseKey(SDL_Renderer* renderer, int fps) {
 						break;
 					case 3:
 						int paddleX;
-						//SDL_Point* ballMultiplicator = new SDL_Point[actualBalls];
 						float* ballMulX = new float[actualBalls];
 						float* ballMulY = new float[actualBalls];
 						getActualPadddleCoordinates(&paddleX);
@@ -185,20 +204,50 @@ void detectPauseKey(SDL_Renderer* renderer, int fps) {
 						ballPercentages = getActualBallPercentages(ballPercentages);
 						ballMulX = getBallSpeedMultiplicatorsX(ballMulX);
 						ballMulY = getBallSpeedMultiplicatorsY(ballMulY);
-						//ballMultiplicator = getBallSpeedMultiplicators(ballMultiplicator);
+						SDL_Point* capsulePercentages = new SDL_Point[actualCapsules];
+						capsulePercentages = getActualCapsulePercentages(capsulePercentages);
+						SDL_Point* bulletPercentages = new SDL_Point[actualBullets];
+						bulletPercentages = getActualBulletPercentages(bulletPercentages);
 						fullscreenOnOff(renderer);
-						changeFullscreenGameSize(renderer, fps);
+						changeFullscreenGameSize(renderer, fps, window);
 						setWindowPaddleCoordinates(paddleX);
-						for (int i = 0; i < actualBalls; i++) {
-							ballRect[i] = setWindowRectCoordinates(ballPercentages[i].x, ballPercentages[i].y, ballRect[i]);
-						}
+
 						reziseBalls();
+						int k = 0;
+						for (auto ball : balls) {
+							int x;
+							int y;
+							setWindowRectCoordinates(ballPercentages[k].x, ballPercentages[k].y, &x, &y, ball->getWidth(), ball->getHeight());
+							ball->setX((float)x);
+							ball->setY((float)y);
+							k++;
+						}
 						setMultiplicatorBallSpeed(ballMulX, ballMulY);
-						//setMultiplicatorBallSpeed(ballMultiplicator);
-						//delete[] ballMultiplicator;
+
+						resizeCapsules();
+						for (int i = 0; i < actualCapsules; i++) {
+							int x;
+							int y;
+							setWindowRectCoordinates(capsulePercentages[i].x, capsulePercentages[i].y, &x, &y, capsules.at(i)->getWidth(), capsules.at(i)->getHeight());
+							capsules.at(i)->setX((float)x);
+							capsules.at(i)->setY((float)y);
+						}
+
 						delete[] ballMulX;
 						delete[] ballMulY;
 						delete[] ballPercentages;
+						delete[] capsulePercentages;
+
+						resizeBullets();
+						for (int i = 0; i < actualBullets; i++) {
+							int x;
+							int y;
+							setWindowRectCoordinates(bulletPercentages[i].x, bulletPercentages[i].y, &x, &y, bullets.at(i)->getW(), bullets.at(i)->getH());
+							bullets.at(i)->setX((float)x);
+							bullets.at(i)->setY((float)y);
+						}
+						delete[] bulletPercentages;
+
 						break;
 					}
 					break;

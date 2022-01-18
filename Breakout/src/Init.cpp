@@ -1,9 +1,10 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
-#include <iostream>
-#include "GlobalVariables.h"
 #include "Paddle.h"
 #include "Ball.h"
 #include "Menu.h"
@@ -11,45 +12,40 @@
 #include "Update.h"
 #include "Command.h"
 #include "Capsule.h"
+#include "Render.h"
 
 bool init(SDL_Window** window, SDL_Renderer** renderer) {
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", SDL_GetError(), NULL);
-		SDL_Quit();
-		std::cout << "SDL is not initialized" << std::endl;
+	if (!initRenderer(window, renderer, getScreenWidth(), getScreenHeight()))
 		return false;
-	}
-	*window = SDL_CreateWindow("Breakout", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
-	if (window == NULL) {
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Window", "The window is not working", NULL);
+
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
+
+		SDL_Quit();
 		return false;
 	}
 
 	if (IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) {
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Image", "The PNG image is not working", NULL);
+		SDL_Log("Unable to initialize SDL_image: %s", SDL_GetError());
 		return false;
 	}
 
 	if (TTF_Init() < 0) {
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Ttf", "Ttf is not working", NULL);
-		return false;
-	}
-
-	*renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL) {
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Renderer", "The renderer is not working", NULL);
+		SDL_Log("Unable to initialize SDL_ttf: %s", SDL_GetError());
 		return false;
 	}
 
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Audio", "The audio is not working", NULL);
+		SDL_Log("Audio is not working");
 	}
+	Mix_VolumeMusic(SDL_MIX_MAXVOLUME / 2);
 
+	SDL_Log("start process is completed");
 	return true;
 }
 
 void initVariables(SDL_Renderer* renderer) {
-	initMenu();
+	initMenu(renderer);
 	initPaddle();
 	initBall();
 	createRectangles();

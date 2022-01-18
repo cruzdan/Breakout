@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <SDL.h>
 extern SDL_Texture* backgroundTexture;
 extern SDL_Texture* shipTexture;

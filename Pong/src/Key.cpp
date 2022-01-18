@@ -1,8 +1,12 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include "Music.h"
 #include "Menu.h"
 #include "Paddle.h"
 #include "Ball.h"
+
 const unsigned char* keys;
 int menuIndex = 0;
 int gameOver = 0;
@@ -107,7 +111,7 @@ void detectKeyGame_2() {
 }
 
 void detectKeyStart() {
-	
+
 	SDL_Event event;
 	int typeEvent;
 	if (SDL_PollEvent(&event)) {

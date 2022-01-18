@@ -1,11 +1,36 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include "GlobalVariables.h"
 #include "Music.h"
 #include "Init.h"
 #include "Command.h"
 #include "Capsule.h"
-#include "Image.h"
+#include "Render.h"
+#include "Paddle.h"
+#include "Brick.h"
+
+int actualServeTime = 0;
+int SCREEN_WIDTH = 720;
+int SCREEN_HEIGHT = 480;
+SDL_Texture* backgroundImages[10];
+
+void setScreenWidth(int width) {
+	SCREEN_WIDTH = width;
+}
+
+void setScreenHeight(int height) {
+	SCREEN_HEIGHT = height;
+}
+
+int getScreenWidth() {
+	return SCREEN_WIDTH;
+}
+
+int getScreenHeight() {
+	return SCREEN_HEIGHT;
+}
 
 //board
 int boardWidth;
@@ -75,118 +100,40 @@ void initBackgroundIndex() {
 }
 
 void loadBackgroundImage(SDL_Renderer* renderer) {
-	switch (backGroundIndex) {
-	case 0:
-		loadImage(renderer, &backgroundTexture, "images/background/common-heather.jpg");
-		break;
-	case 1:
-		loadImage(renderer, &backgroundTexture, "images/background/field.jpg");
-		break;
-	case 2:
-		loadImage(renderer, &backgroundTexture, "images/background/house.jpg");
-		break;
-	case 3:
-		loadImage(renderer, &backgroundTexture, "images/background/lightning.jpg");
-		break;
-	case 4:
-		loadImage(renderer, &backgroundTexture, "images/background/petit-minou-lighthouse.jpg");
-		break;
-	case 5:
-		loadImage(renderer, &backgroundTexture, "images/background/port.jpg");
-		break;
-	case 6:
-		loadImage(renderer, &backgroundTexture, "images/background/street.jpg");
-		break;
-	case 7:
-		loadImage(renderer, &backgroundTexture, "images/background/walking.jpg");
-		break;
-	case 8:
-		loadImage(renderer, &backgroundTexture, "images/background/water.jpg");
-		break;
-	case 9:
-		loadImage(renderer, &backgroundTexture, "images/background/sand.jpg");
-		break;
-	}
+	backgroundTexture = NULL;
+	backgroundTexture = backgroundImages[backGroundIndex];
 }
 
 void writeGameMenu(SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30);
-	SDL_Surface* textSurface;
-	textSurface = TTF_RenderText_Solid(font, "Score", color);
-	textScore = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "0", color);
-	textPuntuation = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "Level", color);
-	textLevel = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "1", color);
-	textLevelPuntuation = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "Lives", color);
-	textLives = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "3", color);
-	textLifeNumber = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "Press R to restart", color);
-	textRestart = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30, "Score", &textScore, renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30, std::to_string(score), &textPuntuation, renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30, "Level", &textLevel, renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30, std::to_string(level), &textLevelPuntuation, renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30, "Lifes", &textLives, renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30, std::to_string(lifes), &textLifeNumber, renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30, "Press R to restart", &textRestart, renderer);
+	generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-Stencil.ttf", getScreenHeight() / 15, "1", &textStart, renderer);
 }
 
 void writePauseMenu(SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", (int)(SCREEN_HEIGHT * 0.15));
-	SDL_Surface* textSurface;
-
-	textSurface = TTF_RenderText_Solid(font, "Pause", color);
-	pauseTextures[0] = SDL_CreateTextureFromSurface(renderer, textSurface);
-	pauseRects[0].w = textSurface->w;
-
-	font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10);
-
-	textSurface = TTF_RenderText_Solid(font, "Press Esc to return to the game", color);
-	pauseTextures[1] = SDL_CreateTextureFromSurface(renderer, textSurface);
-	pauseRects[1].w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Music volume", color);
-	pauseTextures[2] = SDL_CreateTextureFromSurface(renderer, textSurface);
-	pauseRects[2].w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Sound volume", color);
-	pauseTextures[3] = SDL_CreateTextureFromSurface(renderer, textSurface);
-	pauseRects[3].w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Fullscreen", color);
-	pauseTextures[4] = SDL_CreateTextureFromSurface(renderer, textSurface);
-	pauseRects[4].w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Press here to exit", color);
-	pauseTextures[5] = SDL_CreateTextureFromSurface(renderer, textSurface);
-	pauseRects[5].w = textSurface->w;
-
-	if(musicOn)
-		textSurface = TTF_RenderText_Solid(font, "ON", color);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", (int)(SCREEN_HEIGHT * 0.15), "Pause", &pauseTextures[0], &pauseRects[0], renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "Press Esc to return to the game", &pauseTextures[1], &pauseRects[1], renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "Music volume", &pauseTextures[2], &pauseRects[2], renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "Sound volume", &pauseTextures[3], &pauseRects[3], renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "Fullscreen", &pauseTextures[4], &pauseRects[4], renderer);
+	generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "Press here to exit", &pauseTextures[5], &pauseRects[5], renderer);
+	if (musicOn)
+		generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[6], &pauseRects[6], renderer);
 	else
-		textSurface = TTF_RenderText_Solid(font, "OFF", color);
-	pauseTextures[6] = SDL_CreateTextureFromSurface(renderer, textSurface);
-
+		generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[6], &pauseRects[6], renderer);
 	if (soundOn)
-		textSurface = TTF_RenderText_Solid(font, "ON", color);
+		generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[7], &pauseRects[7], renderer);
 	else
-		textSurface = TTF_RenderText_Solid(font, "OFF", color);
-	pauseTextures[7] = SDL_CreateTextureFromSurface(renderer, textSurface);
-	
+		generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[7], &pauseRects[7], renderer);
 	if (fullscreen)
-		textSurface = TTF_RenderText_Solid(font, "ON", color);
+		generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[8], &pauseRects[8], renderer);
 	else
-		textSurface = TTF_RenderText_Solid(font, "OFF", color);
-	pauseTextures[8] = SDL_CreateTextureFromSurface(renderer, textSurface);
-
-	textSurface = TTF_RenderText_Solid(font, "ON", color);
-	pauseRects[6].w = textSurface->w;
-	pauseRects[7].w = textSurface->w;
-	pauseRects[8].w = textSurface->w;
-
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+		generateTextTexture(color, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[8], &pauseRects[8], renderer);
 }
 
 void closeMenu() {
@@ -266,65 +213,33 @@ void showPauseMenu(SDL_Renderer* renderer) {
 	}
 }
 
-void start(float time) {
+void start(float time, SDL_Renderer* renderer) {
 	timer += time;
+	if (actualServeTime != (int)timer) {
+		actualServeTime = (int)timer;
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-Stencil.ttf", getScreenHeight() / 15, std::to_string((int)timer + 1), &textStart, renderer);
+	}
 	if (timer >= 3.0f) {
 		timer = 0;
 		serve = false;
 	}
 }
 
-void countStart(SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-Stencil.ttf", SCREEN_HEIGHT / 15);
-	SDL_Surface* textSurface;
-	char c[4];
-	int m = (int)timer + 1;
-	SDL_itoa(m, c, 10);
-	textSurface = TTF_RenderText_Solid(font, c, color);
-	textStart = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+void loadBackgroundImages(SDL_Renderer* renderer) {
+	loadImage(renderer, "images/background/common-heather.jpg", &backgroundImages[0]);
+	loadImage(renderer, "images/background/field.jpg", &backgroundImages[1]);
+	loadImage(renderer, "images/background/house.jpg", &backgroundImages[2]);
+	loadImage(renderer, "images/background/lightning.jpg", &backgroundImages[3]);
+	loadImage(renderer, "images/background/petit-minou-lighthouse.jpg", &backgroundImages[4]);
+	loadImage(renderer, "images/background/port.jpg", &backgroundImages[5]);
+	loadImage(renderer, "images/background/street.jpg", &backgroundImages[6]);
+	loadImage(renderer, "images/background/walking.jpg", &backgroundImages[7]);
+	loadImage(renderer, "images/background/water.jpg", &backgroundImages[8]);
+	loadImage(renderer, "images/background/sand.jpg", &backgroundImages[9]);
 }
 
-void writeLife(SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30);
-	SDL_Surface* textSurface;
-	char c[2];
-	SDL_itoa(lifes, c, 10);
-	textSurface = TTF_RenderText_Solid(font, c, color);
-	textLifeNumber = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
-}
+void initMenu(SDL_Renderer* renderer) {
 
-void writeLevel(SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30);
-	SDL_Surface* textSurface;
-	char c[4];
-	SDL_itoa(level, c, 10);
-	textSurface = TTF_RenderText_Solid(font, c, color);
-	textLevelPuntuation = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
-}
-
-void writeScore(SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30);
-	SDL_Surface* textSurface;
-	//char c[4];
-	//SDL_itoa(score, c, 10);
-	textSurface = TTF_RenderText_Solid(font, std::to_string(score).c_str(), color);
-	textPuntuation = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
-}
-
-void initMenu() {
-	
 	boardWidth = int(SCREEN_WIDTH * 0.8);
 
 	menuWidth = SCREEN_WIDTH - boardWidth;
@@ -360,7 +275,7 @@ void initMenu() {
 	for (int i = 1; i < 6; i++) {
 		pauseRects[i].x = 0;
 	}
-	
+
 	for (int i = 1; i < 6; i++) {
 		pauseRects[i].y = pauseRects[i - 1].y + pauseRects[i - 1].h + spaceY;
 		pauseRects[i].h = SCREEN_HEIGHT / 10;
@@ -373,7 +288,7 @@ void initMenu() {
 
 	for (int i = 0; i < 5; i++) {
 		musicVolumeRect[i].w = (int)(SCREEN_WIDTH * 0.03);
-		musicVolumeRect[i].h = (int)(SCREEN_WIDTH * 0.01 * (i + 1));
+		musicVolumeRect[i].h = (int)(SCREEN_WIDTH * 0.01 * ((double)i + 1));
 		musicVolumeRect[i].y = pauseRects[2].y + pauseRects[2].h - musicVolumeRect[i].h;
 
 		soundVolumeRect[i].w = musicVolumeRect[i].w;
@@ -397,25 +312,15 @@ void setMusicRects(int number) {
 	musicActiveRects = number;
 }
 
-void changeOnOffTextureText(SDL_Texture** texture, bool on, SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10);
-	SDL_Surface* textSurface;
-	if (on)
-		textSurface = TTF_RenderText_Solid(font, "ON", color);
-	else
-		textSurface = TTF_RenderText_Solid(font, "OFF", color);
-	*texture = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
-}
-
 void turnOnMusic(SDL_Renderer* renderer) {
 	musicOn = true;
 	if (Mix_PausedMusic()) {
 		Mix_ResumeMusic();
 	}
-	changeOnOffTextureText(&pauseTextures[6], musicOn, renderer);
+	if (musicOn)
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[6], renderer);
+	else
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[6], renderer);
 }
 
 void turnOffMusic(SDL_Renderer* renderer) {
@@ -423,18 +328,27 @@ void turnOffMusic(SDL_Renderer* renderer) {
 	if (Mix_PlayingMusic()) {
 		Mix_PauseMusic();
 	}
-	changeOnOffTextureText(&pauseTextures[6], musicOn, renderer);
+	if (musicOn)
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[6], renderer);
+	else
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[6], renderer);
 }
 
 void turnOnSound(SDL_Renderer* renderer) {
 	soundOn = true;
 	Mix_VolumeChunk(sound, (int)(MIX_MAX_VOLUME * 0.2 * soundActiveRects));
-	changeOnOffTextureText(&pauseTextures[7], soundOn, renderer);
+	if (soundOn)
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[7], renderer);
+	else
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[7], renderer);
 }
 
 void turnOffSound(SDL_Renderer* renderer) {
 	soundOn = false;
-	changeOnOffTextureText(&pauseTextures[7], soundOn, renderer);
+	if (soundOn)
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[7], renderer);
+	else
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[7], renderer);
 	Mix_VolumeChunk(sound, 0);
 }
 
@@ -451,7 +365,10 @@ void musicOnOff(SDL_Renderer* renderer) {
 			Mix_PauseMusic();
 		}
 	}
-	changeOnOffTextureText(&pauseTextures[6], musicOn, renderer);
+	if (musicOn)
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[6], renderer);
+	else
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[6], renderer);
 }
 
 void soundOnOff(SDL_Renderer* renderer) {
@@ -460,16 +377,22 @@ void soundOnOff(SDL_Renderer* renderer) {
 		Mix_VolumeChunk(sound, (int)(MIX_MAX_VOLUME * 0.2 * soundActiveRects));
 	else
 		Mix_VolumeChunk(sound, 0);
-	changeOnOffTextureText(&pauseTextures[7], soundOn, renderer);
+	if (soundOn)
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[7], renderer);
+	else
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[7], renderer);
 }
 
 void fullscreenOnOff(SDL_Renderer* renderer) {
 	fullscreen = !fullscreen;
-	changeOnOffTextureText(&pauseTextures[8], fullscreen, renderer);
+	if (fullscreen)
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "ON", &pauseTextures[8], renderer);
+	else
+		generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 10, "OFF", &pauseTextures[8], renderer);
 }
 
 
-//cahnge volume of music to 0.2 * activeMusicRects and change the text on/off if it is necesary
+//change volume of music to 0.2 * activeMusicRects and change the text on/off if it is necesary
 void changeMusicRects(SDL_Renderer* renderer, int activeMusicRects) {
 	Mix_VolumeMusic((int)(MIX_MAX_VOLUME * activeMusicRects * 0.2));
 	setMusicRects(activeMusicRects);
@@ -481,28 +404,26 @@ void changeMusicRects(SDL_Renderer* renderer, int activeMusicRects) {
 	}
 }
 
-void changeWindowGameSize(SDL_Renderer* renderer, int fps) {
-	extern SDL_Window* window;
+void changeWindowGameSize(SDL_Renderer* renderer, int fps, SDL_Window* window) {
 	int screenWidth;
 	int screenHeight;
 	SDL_GetWindowSize(window, &screenWidth, &screenHeight);
 	setScreenWidth(screenWidth);
 	setScreenHeight(screenHeight);
-	initVariables(renderer);
+	initMenu(renderer);
+	initPaddle();
+	resizeBricks();
+	initCommandLine();
+	initCapsuleVariables(renderer);
 	writeGameMenu(renderer);
 	writePauseMenu(renderer);
-	countStart(renderer);
-	writeLife(renderer);
-	writeLevel(renderer);
-	writeScore(renderer);
 	writeCommandLineText(renderer, command);
 	writeAllCommands(renderer);
-	writeFPSText(renderer, fps);
+	generateTextTexture({ 36,144,98 }, "fonts/OpenSans-Bold.ttf", fpsTextRect.h, std::to_string(fps), &fpsText, &fpsTextRect, renderer);
 }
 
-void changeFullscreenGameSize(SDL_Renderer* renderer, int fps) {
+void changeFullscreenGameSize(SDL_Renderer* renderer, int fps, SDL_Window* window) {
 	if (fullscreen) {
-		extern SDL_Window* window;
 		SDL_DisplayMode DM;
 		SDL_GetCurrentDisplayMode(0, &DM);
 		auto Width = DM.w;
@@ -511,18 +432,17 @@ void changeFullscreenGameSize(SDL_Renderer* renderer, int fps) {
 		SDL_SetWindowSize(window, Width, Height);
 		setScreenWidth(Width);
 		setScreenHeight(Height);
-		initVariables(renderer);
+		initMenu(renderer);
+		initPaddle();
+		resizeBricks();
+		initCommandLine();
+		initCapsuleVariables(renderer);
 		writeGameMenu(renderer);
 		writePauseMenu(renderer);
-		countStart(renderer);
-		writeLife(renderer);
-		writeLevel(renderer);
-		writeScore(renderer);
 	}
 	else {
-		extern SDL_Window* window;
 		SDL_SetWindowFullscreen(window, 0);
-		changeWindowGameSize(renderer, fps);
+		changeWindowGameSize(renderer, fps, window);
 	}
 }
 

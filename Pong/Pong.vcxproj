@@ -27,6 +27,7 @@
     <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\Music.cpp" />
     <ClCompile Include="src\Paddle.cpp" />
+    <ClCompile Include="src\Render.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Ball.h" />
@@ -37,6 +38,7 @@
     <ClInclude Include="src\Menu.h" />
     <ClInclude Include="src\Music.h" />
     <ClInclude Include="src\Paddle.h" />
+    <ClInclude Include="src\Render.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\.gitignore" />

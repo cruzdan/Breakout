@@ -1,12 +1,15 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include <string>
 #include <SDL_ttf.h>
-#include "GlobalVariables.h"
 #include "Menu.h"
 #include "Paddle.h"
 #include "Ball.h"
 #include "Update.h"
 #include "Brick.h"
+#include "Render.h"
 
 //command line
 bool commandLine = false;
@@ -44,9 +47,9 @@ std::string commands[totalCommands] = {
 
 void initCommandLine() {
 	commandLineRect.x = 0;
-	commandLineRect.y = (int)(SCREEN_HEIGHT * 0.95);
-	commandLineRect.w = SCREEN_WIDTH;
-	commandLineRect.h = (int)(SCREEN_HEIGHT * 0.05);
+	commandLineRect.y = (int)(getScreenHeight() * 0.95);
+	commandLineRect.w = getScreenWidth();
+	commandLineRect.h = (int)(getScreenHeight() * 0.05);
 
 	commandTextRect.x = commandLineRect.x;
 	commandTextRect.y = commandLineRect.y;
@@ -58,8 +61,8 @@ void initCommandLine() {
 
 	commandMenuRect.x = 0;
 	commandMenuRect.h = totalCommands * commandLineRect.h;
-	commandMenuRect.y = SCREEN_HEIGHT - commandMenuRect.h - commandLineRect.h;
-	commandMenuRect.w = SCREEN_WIDTH;
+	commandMenuRect.y = getScreenHeight() - commandMenuRect.h - commandLineRect.h;
+	commandMenuRect.w = getScreenWidth();
 
 	for (int i = 0; i < totalCommands; i++) {
 		commandRects[i].x = 0;
@@ -77,50 +80,17 @@ void showAllCommands(SDL_Renderer* renderer) {
 }
 
 void writeAllCommands(SDL_Renderer* renderer) {
-	SDL_Color color = { 255,255,255 };
-	TTF_Font* font = TTF_OpenFont("fonts/OpenSans-Bold.ttf", commandLineRect.h);
-	SDL_Surface* textSurface;
-
 	for (int i = 0; i < totalCommands; i++) {
-		textSurface = TTF_RenderText_Solid(font, commands[i].c_str(), color);
-		commandTextures[i] = SDL_CreateTextureFromSurface(renderer, textSurface);
-		commandRects[i].w = textSurface->w;
+		generateTextTexture({ 255,255,255,0 }, "fonts/OpenSans-Bold.ttf", commandLineRect.h, commands[i], &commandTextures[i], &commandRects[i], renderer);
 	}
-
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
 }
 
 void writeCommandLineText(SDL_Renderer* renderer, std::string text) {
-	SDL_Color color = { 255,255,255 };
-	TTF_Font* font = TTF_OpenFont("fonts/OpenSans-Bold.ttf", commandLineRect.h);
-	SDL_Surface* textSurface;
-
-	textSurface = TTF_RenderText_Solid(font, text.c_str(), color);
-	commandText = SDL_CreateTextureFromSurface(renderer, textSurface);
-	if(text.size() < 1)
-		commandTextRect.w = 0;
+	commandTextRect.w = 0;
+	if (text.size() < 1)
+		generateTextTexture({ 255,255,255,0 }, "fonts/OpenSans-Bold.ttf", commandLineRect.h, text, &commandText, renderer);
 	else
-		commandTextRect.w = textSurface->w;
-
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
-}
-
-void writeFPSText(SDL_Renderer* renderer, int fps) {
-	SDL_Color color = { 36,144,98 };
-	TTF_Font* font = TTF_OpenFont("fonts/OpenSans-Bold.ttf", fpsTextRect.h);
-	SDL_Surface* textSurface;
-	char c[4];
-	SDL_itoa(fps, c, 10);
-	textSurface = TTF_RenderText_Solid(font, c, color);
-	fpsText = SDL_CreateTextureFromSurface(renderer, textSurface);
-	fpsTextRect.w = textSurface->w;
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+		generateTextTexture({ 255,255,255,0 }, "fonts/OpenSans-Bold.ttf", commandLineRect.h, text, &commandText, &commandTextRect, renderer);
 }
 
 //add the word specified by event.key.keysym.scancode number in the string command
@@ -141,7 +111,7 @@ void addWordToCommand(SDL_Renderer* renderer, int wordNumber) {
 		//number in ASCII 0
 		command += '0';
 	}
-	else if(wordNumber == 44){
+	else if (wordNumber == 44) {
 		//space
 		command += ' ';
 	}
@@ -189,7 +159,7 @@ void checkCommandMatch(SDL_Renderer* renderer) {
 				break;
 			case 10:
 				score += actualBricks;
-				writeScore(renderer);
+				generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", getScreenHeight() / 30, std::to_string(score), &textPuntuation, renderer);
 				nextLevel(renderer);
 				break;
 			}

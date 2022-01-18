@@ -1,22 +1,22 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include "GlobalVariables.h"
-#include "Joystick.h"
 #include "Music.h"
 #include "Key.h"
 #include "Menu.h"
 #include "Ball.h"
 #include "Paddle.h"
 #include "Init.h"
+#include "Render.h"
 
-SDL_Window* window;
-SDL_Renderer* renderer;
-
-void initVariables() {
-	initMenu();
+void initVariables(SDL_Renderer* renderer) {
+	initMenu(renderer);
 	initPaddle();
-	initBall();
+	initBall(renderer);
 }
 
 void closeTextures() {
@@ -24,12 +24,10 @@ void closeTextures() {
 	closeBall();
 }
 
-void close() {
+void close(SDL_Renderer* renderer, SDL_Window* window) {
 	closeTextures();
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
+	closeRenderer(window, renderer);
 	closeMusic();
-	closeJoystick();
 	Mix_Quit();
 	TTF_Quit();
 	IMG_Quit();
@@ -37,13 +35,16 @@ void close() {
 }
 
 int main(int argc, char* args[]) {
-	if (!init(&window, &renderer))
+	SDL_Window* window;
+	SDL_Renderer* renderer;
+	if (!initRenderer(&window, &renderer, SCREEN_WIDTH, SCREEN_HEIGHT))
+		return -1;
+	if (!init())
 		return -1;
 	initSounds();
 	initKeyboard();
-	loadImageBall();
-	initVariables();
-	initJoystick();
+	loadImage(renderer, "images/ball1.png", &ballImageTexture);
+	initVariables(renderer);
 
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
@@ -57,47 +58,38 @@ int main(int argc, char* args[]) {
 		switch (menuIndex) {
 
 		case 0:
-			drawStartMenu();
+			drawStartMenu(renderer);
 			detectKeyStart();
 			break;
 
 		case 1:
 			if (!serve) {
-				moveBall();
+				moveBall(renderer);
 			}
 			else {
 				start(frameDelay);
-				countStart();
+				countStart(renderer);
 			}
 			if (players == 1) {
-				if (totalJoysticks > 0)
-					detectKeyJoystick(joystick1, &paddle1);
 				detectKeyGame_1();
 				moveArtificialPaddle();
 			}
 			else {
-				if (totalJoysticks > 0) {
-					if (totalJoysticks > 1) {
-						detectKeyJoystick(joystick2, &paddle2);
-					}
-					detectKeyJoystick(joystick1, &paddle1);
-				}
-
 				detectKeyGame_2();
 			}
-			drawGameMenu();
+			drawGameMenu(renderer);
 			break;
 
 		case 2:
 			detectKeyPause();
-			drawPauseMenu();
+			drawPauseMenu(renderer);
 		}
 
 		frameTime = SDL_GetTicks() - frameStart;
 
-		if(frameDelay > frameTime)
+		if (frameDelay > frameTime)
 			SDL_Delay(frameDelay - frameTime);
 	}
-	close();
+	close(renderer, window);
 	return 0;
 }

@@ -13,8 +13,14 @@ public:
 	void setSpeed(const float num) { speed = num; }
 	float getOriginalAngle() const { return originalAngle; }
 	void setOriginalAngle(const float ang) { originalAngle = ang; }
-	SDL_Rect getRect() const { return rect; }
-	void setRect(const SDL_Rect rec) { rect = rec; }
+	float getX() const { return x; }
+	void setX(const float newX) { x = newX; }
+	float getY() const { return y; }
+	void setY(const float newY) { y = newY; }
+	int getW() const { return w; }
+	void setW(const int newW) { w = newW; }
+	int getH() const { return h; }
+	void setH(const int newH) { h = newH; }
 
 	void showAsteroid(SDL_Renderer* renderer);
 	void moveAsteroid(float deltaTime);
@@ -24,5 +30,8 @@ private:
 	float angle;
 	float speed;
 	float originalAngle;
-	SDL_Rect rect;
+	float x;
+	float y;
+	int w;
+	int h;
 };

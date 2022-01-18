@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL_mixer.h>
 #include "Ball.h"
 #include "Menu.h"
@@ -5,60 +8,72 @@
 #include "Paddle.h"
 #include "Music.h"
 #include "Brick.h"
-#include "GlobalVariables.h"
 #include "Paddle.h"
 #include "Capsule.h"
-#include "Delete.h"
+#include "Render.h"
 
 //rect is the ball or the bullet
 bool checkRectCollisionBrick(SDL_Rect rect, int* position) {
 	int posX, posY, pos;
-	posX = rect.x / (brick.w + freeSizeX);
-	posY = (rect.y - initialBrickY) / (brick.h + freeSizeY);
+	posX = rect.x / (bricks.at(0)->getW() + freeSizeX);
+	posY = (rect.y - initialBrickY) / (bricks.at(0)->getH() + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
-	if (pos >= 0 && pos < totalRectangles && brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
-		*position = pos;
-		return true;
+	SDL_Rect brect;
+	brect.w = bricks.at(0)->getW();
+	brect.h = bricks.at(0)->getH();
+	if (pos >= 0 && pos < totalRectangles) {
+		brect.x = (int)bricks.at(pos)->getX();
+		brect.y = (int)bricks.at(pos)->getY();
+		if (bricks.at(pos)->getLifes() > 0 && SDL_HasIntersection(&rect, &brect)) {
+			*position = pos;
+			return true;
+		}
 	}
 
-	posX = (rect.x + rect.w) / (brick.w + freeSizeX);
-	posY = (rect.y - initialBrickY) / (brick.h + freeSizeY);
+	posX = (rect.x + rect.w) / (brect.w + freeSizeX);
+	posY = (rect.y - initialBrickY) / (brect.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
-
-	if (pos >= 0 && pos < totalRectangles && brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
-		*position = pos;
-		return true;
+	if (pos >= 0 && pos < totalRectangles) {
+		brect.x = (int)bricks.at(pos)->getX();
+		brect.y = (int)bricks.at(pos)->getY();
+		if (bricks.at(pos)->getLifes() > 0 && SDL_HasIntersection(&rect, &brect)) {
+			*position = pos;
+			return true;
+		}
 	}
 
-	posX = rect.x / (brick.w + freeSizeX);
-	posY = (rect.y + rect.h - initialBrickY) / (brick.h + freeSizeY);
+	posX = rect.x / (brect.w + freeSizeX);
+	posY = (rect.y + rect.h - initialBrickY) / (brect.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
-
-	if (pos >= 0 && pos < totalRectangles && brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
-		*position = pos;
-		return true;
+	if (pos >= 0 && pos < totalRectangles) {
+		brect.x = (int)bricks.at(pos)->getX();
+		brect.y = (int)bricks.at(pos)->getY();
+		if (bricks.at(pos)->getLifes() > 0 && SDL_HasIntersection(&rect, &brect)) {
+			*position = pos;
+			return true;
+		}
 	}
 
-	posX = (rect.x + rect.w) / (brick.w + freeSizeX);
-	posY = (rect.y + rect.h - initialBrickY) / (brick.h + freeSizeY);
+	posX = (rect.x + rect.w) / (brect.w + freeSizeX);
+	posY = (rect.y + rect.h - initialBrickY) / (brect.h + freeSizeY);
 	pos = posX + posY * totalRectanglesX;
-
-	if (pos >= 0 && pos < totalRectangles && brickLives[pos] > 0 && SDL_HasIntersection(&rect, &rectangles[pos])) {
-		*position = pos;
-		return true;
+	if (pos >= 0 && pos < totalRectangles) {
+		brect.x = (int)bricks.at(pos)->getX();
+		brect.y = (int)bricks.at(pos)->getY();
+		if (bricks.at(pos)->getLifes() > 0 && SDL_HasIntersection(&rect, &brect)) {
+			*position = pos;
+			return true;
+		}
 	}
 	return false;
 }
 
 void nextLevel(SDL_Renderer* renderer) {
 	level++;
-	writeLevel(renderer);
+	generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", getScreenHeight() / 30, std::to_string(level), &textLevelPuntuation, renderer);
 	centerPaddle();
 	restartBall();
-	initBrickRows();
-	initBrickLives();
 	createRectangles();
-	initBrickImageType();
 	restartCapsules();
 	restartBullets();
 	initBackgroundIndex();
@@ -68,28 +83,32 @@ void nextLevel(SDL_Renderer* renderer) {
 	serve = true;
 }
 
-//rect is the ball or the bullet, ball indicates if the rect is a ball, and ball index is the ballRect index
-bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, int ballIndex) {
+//rect is the ball or the bullet, ball indicates if the rect is of a ball
+bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, int ballIndex, float time) {
 	//detect the collision of the ball with the bricks
-	if (rect.y <= lastBrickY && rect.y + rect.h >= rectangles[0].y) {
+	if (rect.y <= lastBrickY && rect.y + rect.h >= bricks.at(0)->getY()) {
 		int pos = 0;
 		if (checkRectCollisionBrick(rect, &pos)) {
-
 			Mix_PlayChannel(1, sound, 0);
 			score++;
-			brickLives[pos]--;
-			if (brickLives[pos] < 1) {
+			generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", getScreenHeight() / 30, std::to_string(score), &textPuntuation, renderer);
+			bricks.at(pos)->setLifes(bricks.at(pos)->getLifes() - 1);
+			if (bricks.at(pos)->getLifes() < 1) {
 				checkBrickWithCapsule(pos);
 				actualBricks--;
 			}
-							
-			writeScore(renderer);
 			if (actualBricks < 1) {
 				nextLevel(renderer);
 				return true;
 			}
-			if (ball)
-				changeBallMovementWithBrick(rectangles[pos], ballIndex);
+			if (ball) {
+				SDL_Rect brect;
+				brect.x = (int)bricks.at(pos)->getX();
+				brect.y = (int)bricks.at(pos)->getY();
+				brect.w = bricks.at(pos)->getW();
+				brect.h = bricks.at(pos)->getH();
+				changeBallMovementWithBrick(brect, balls.at(ballIndex), time);
+			}
 			return true;
 		}
 	}
@@ -97,62 +116,68 @@ bool checkRectCollisionBricks(SDL_Rect rect, SDL_Renderer* renderer, bool ball, 
 }
 
 void update(SDL_Renderer* renderer, float time) {
-	for (int i = 0; i < actualBalls; i++) {
-		int xI = (int)(ballRect[i].x + ballSpeedX[i] * time);
-		int xF = (int)(xI + ballRect[i].w);
-		int yI = (int)(ballRect[i].y + ballSpeedY[i] * time);
-		int yF = yI + ballRect[i].h;
+	int i = 0;
+	for (auto ball : balls) {
+		float xI = ball->getX() + ball->getSpeedX() * time;
+		float xF = xI + ball->getWidth();
+		float yI = ball->getY() + ball->getSpeedY() * time;
+		float yF = yI + ball->getHeight();
 		if (xI < 0 || xF > boardWidth) {
-			ballSpeedX[i] = -ballSpeedX[i];
+			ball->setSpeedX(-ball->getSpeedX());
+			xI = ball->getX() + ball->getSpeedX() * time;
 		}
 		else if (yI < 0) {
-			ballSpeedY[i] = -ballSpeedY[i];
+			ball->setSpeedY(-ball->getSpeedY());
+			yI = ball->getY() + ball->getSpeedY() * time;
 		}
-		else if (yF > SCREEN_HEIGHT) {
+		else if (yF > getScreenHeight()) {
 			if (actualBalls < 2) {
 				//the player loses a life
-				ballSpeedY[i] = -ballSpeedY[i];
 				lifes--;
 				if (lifes == 0) {
 					restart(renderer);
 					return;
 				}
 				else {
-					writeLife(renderer);
 					centerPaddle();
 					restartBall();
 					serve = true;
 					restartCapsules();
 					restartBullets();
+					generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", getScreenHeight() / 30, std::to_string(lifes), &textLifeNumber, renderer);
 					return;
 				}
 			}
 			else {
 				//delete a ball
-				
-				deleteElementOfRectArray(ballRect, i, actualBalls);
-				deleteElementOfFloatArray(ballSpeedX, i, actualBalls);
-				deleteElementOfFloatArray(ballSpeedY, i, actualBalls);
+				deleteBallElement(&balls, ball);
 				actualBalls--;
 				break;
 			}
 		}
-		
-		if (SDL_HasIntersection(&ballRect[i], &paddle)) {
+		SDL_Rect rect;
+		rect.x = (int)ball->getX();
+		rect.y = (int)ball->getY();
+		rect.w = ball->getWidth();
+		rect.h = ball->getHeight();
+		if (SDL_HasIntersection(&rect, &paddle)) {
 			Mix_PlayChannel(1, sound, 0);
-			ballSpeedY[i] = (float)(-abs((long)ballSpeedY[i]));
-			
+			ball->setSpeedY(-abs(ball->getSpeedY()));
 			if (xF < paddle.x + paddle.w / 3) {
-				if (ballSpeedX[i] - ballSpeedChangeX / 2 > -maxBallSpeed)
-					ballSpeedX[i] -= ballSpeedChangeX / 2;
+				if (ball->getSpeedX() - ballSpeedChangeX / 2 > -maxBallSpeed)
+					ball->setSpeedX(ball->getSpeedX() - ballSpeedChangeX / 2);
 			}
-			else if (xF > paddle.x + 2 * paddle.w / 3)
-				if (ballSpeedX[i] + ballSpeedChangeX / 2 < maxBallSpeed)
-					ballSpeedX[i] += ballSpeedChangeX / 2;
+			else if (xF > paddle.x + 2 * paddle.w / 3) {
+				if (ball->getSpeedX() + ballSpeedChangeX / 2 < maxBallSpeed)
+					ball->setSpeedX(ball->getSpeedX() + ballSpeedChangeX / 2);
+			}
 		}
-		ballRect[i].x = xI;
-		ballRect[i].y = yI;
-		checkRectCollisionBricks(ballRect[i], renderer, true, i);
+		ball->setX(xI);
+		ball->setY(yI);
+		checkRectCollisionBricks(rect, renderer, true, i, time);
+		if (actualBalls < 2)
+			break;
+		i++;
 	}
 	updatePaddle(time);
 	updateCapsules(renderer, time);

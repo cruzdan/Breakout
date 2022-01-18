@@ -5,10 +5,14 @@
 class Ship {
 public:
 	Ship();
-	SDL_Rect getRect() const { return rect; }
-	void setRect(const int x, const int y, const int w, const int h) { rect = { x,y,w,h }; }
-	void setRectX(const int x) { rect.x = x; }
-	void setRectY(const int y) { rect.y = y; }
+	float getX() const { return x; }
+	void setX(const float newX) { x = newX; }
+	float getY() const { return y; }
+	void setY(const float newY) { y = newY; }
+	int getW() const { return w; }
+	void setW(const int newW) { w = newW; }
+	int getH() const { return h; }
+	void setH(const int newH) { h = newH; }
 	float getAngle() const { return angle; }
 	void setAngle(const float ang) { angle = ang; }
 	float getSpeed() const { return speed; }
@@ -26,22 +30,24 @@ public:
 	float getChangeVel() const { return changeVel; }
 	void setChangeVel(const float vel) { changeVel = vel; }
 	std::vector<class Bullet*> getBullets() { return bullets; }
-
 	void detectKey(const Uint8* keys, float deltaTime);
 	void show(SDL_Renderer* renderer);
 	void decrementVelocity(float deltaTime);
 	void move();
-
 	void incrementBullet(float deltaTime);
 	void restartBullets();
 	void completeRestartBullets();
 	void addBullet(class Bullet* bullet);
 	void deleteBullet(class Bullet* bullet);
 	void showMenuBullets(SDL_Renderer* renderer, int lastMenuX, int lastMenuY, int bulletW, int bulletH);
+	void downShipShoot(float deltaTime);
 
 private:
 	void shoot();
-	SDL_Rect rect;
+	float x;
+	float y;
+	int w;
+	int h;
 	float angle;
 	float speed;
 	double mulX;//static distance to move the ship in X
@@ -50,7 +56,8 @@ private:
 	float maxSpeed;
 	float changeAngle;
 	float changeVel;
-	float bulletTimer;
+	float bulletTimer;//timer to add a new bullet
+	float shootTimer;
 	int bulletsAvailable;
 
 	std::vector<class Bullet*> bullets;

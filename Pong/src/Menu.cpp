@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <iostream>
@@ -5,6 +8,7 @@
 #include "Menu.h"
 #include "Ball.h"
 #include "Paddle.h"
+#include "Render.h"
 
 //Menu 0: Start
 SDL_Texture* pongText;
@@ -50,8 +54,6 @@ SDL_Rect menu2_6Rect;
 SDL_Rect menu2_7Rect;
 SDL_Rect board;
 
-extern SDL_Renderer* renderer;
-
 //pause
 SDL_Texture* textStart;
 SDL_Rect startRect;
@@ -69,27 +71,16 @@ void assignProperties(SDL_Rect* rect, int w, int h, int x, int y) {
 	rect->y = y;
 }
 
-//update the score
-void updateScore() {
+void updateScore(SDL_Renderer* renderer) {
 	SDL_Color color = { 255,255,255 };
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", 16);
-	SDL_Surface* textSurface;
-	char d[4];
-	char c[4];
-	SDL_itoa(score1, c, 10);
-	SDL_itoa(score2, d, 10);
+	std::string route = "fonts/Oswald-BoldItalic.ttf";
+	int fontSize = SCREEN_HEIGHT / 30;
 
-	textSurface = TTF_RenderText_Solid(font, c, color);
-	puntuation1Text = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, d, color);
-	puntuation2Text = SDL_CreateTextureFromSurface(renderer, textSurface);
-
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+	generateTextTexture(color, route, fontSize, std::to_string(score1), &puntuation1Text, renderer);
+	generateTextTexture(color, route, fontSize, std::to_string(score2), &puntuation2Text, renderer);
 }
 
-void initMenu() {
+void initMenu(SDL_Renderer* renderer) {
 	assignProperties(&menu, SCREEN_WIDTH, SCREEN_HEIGHT / 5, 0, 0);
 	assignProperties(&board, SCREEN_WIDTH, SCREEN_HEIGHT - menu.h, 0, menu.h);
 	assignProperties(&scoreRect, menu.w / 3, menu.h / 2, menu.w / 3, 0);
@@ -134,89 +125,52 @@ void initMenu() {
 	assignPropertiesPauseMenu(&menu2_6Rect, menu2_5Rect.y + menu2_5Rect.h + spaceY);
 	assignPropertiesPauseMenu(&menu2_7Rect, menu2_6Rect.y + menu2_6Rect.h + spaceY);
 
-	initStartMenu();
-	initGameMenu();
-	initPauseMenu();
-	updateScore();
+	initStartMenu(renderer);
+	initGameMenu(renderer);
+	initPauseMenu(renderer);
+	updateScore(renderer);
 }
 
-void initPauseMenu() {
+void initPauseMenu(SDL_Renderer* renderer) {
 	SDL_Color color = { 255,255,255 };
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30);
-	SDL_Surface* textSurface;
+	std::string route = "fonts/Oswald-BoldItalic.ttf";
+	int fontSize = SCREEN_HEIGHT / 30;
 
-	textSurface = TTF_RenderText_Solid(font, "Pause", color);
-	menuText2_0 = SDL_CreateTextureFromSurface(renderer, textSurface);
-	menu2_0Rect.w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Press w to move paddle 1 up", color);
-	menuText2_1 = SDL_CreateTextureFromSurface(renderer, textSurface);
-	menu2_1Rect.w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Press s to move paddle 1 down", color);
-	menuText2_2 = SDL_CreateTextureFromSurface(renderer, textSurface);
-	menu2_2Rect.w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Press up to move paddle 2 up", color);
-	menuText2_3 = SDL_CreateTextureFromSurface(renderer, textSurface);
-	menu2_3Rect.w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Press down to move paddle 2 down", color);
-	menuText2_4 = SDL_CreateTextureFromSurface(renderer, textSurface);
-	menu2_4Rect.w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Press ESC to resume", color);
-	menuText2_5 = SDL_CreateTextureFromSurface(renderer, textSurface);
-	menu2_5Rect.w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Click here to go to main menu", color);
-	menuText2_6 = SDL_CreateTextureFromSurface(renderer, textSurface);
-	menu2_6Rect.w = textSurface->w;
-
-	textSurface = TTF_RenderText_Solid(font, "Click here to exit", color);
-	menuText2_7 = SDL_CreateTextureFromSurface(renderer, textSurface);
-	menu2_7Rect.w = textSurface->w;
-
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+	generateTextTexture(color, route, fontSize, "Pause", &menuText2_0, &menu2_0Rect, renderer);
+	generateTextTexture(color, route, fontSize, "Press w to move paddle 1 up", &menuText2_1, &menu2_1Rect, renderer);
+	generateTextTexture(color, route, fontSize, "Press s to move paddle 1 down", &menuText2_2, &menu2_2Rect, renderer);
+	generateTextTexture(color, route, fontSize, "Press up to move paddle 2 up", &menuText2_3, &menu2_3Rect, renderer);
+	generateTextTexture(color, route, fontSize, "Press down to move paddle 2 down", &menuText2_4, &menu2_4Rect, renderer);
+	generateTextTexture(color, route, fontSize, "Press ESC to resume", &menuText2_5, &menu2_5Rect, renderer);
+	generateTextTexture(color, route, fontSize, "Click here to go to main menu", &menuText2_6, &menu2_6Rect, renderer);
+	generateTextTexture(color, route, fontSize, "Click here to exit", &menuText2_7, &menu2_7Rect, renderer);
 }
 
-void initGameMenu() {
+void initGameMenu(SDL_Renderer* renderer) {
 	SDL_Color color = { 255,255,255 };
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", 16);
-	SDL_Surface* textSurface;
-	textSurface = TTF_RenderText_Solid(font, "Score", color);
-	scoreText = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "Press R to restart", color);
-	indication1Text = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "Press ESC to pause", color);
-	indication2Text = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+	std::string route = "fonts/Oswald-BoldItalic.ttf";
+	int fontSize = SCREEN_HEIGHT / 30;
+
+	generateTextTexture(color, route, fontSize, "Score", &scoreText, renderer);
+	generateTextTexture(color, route, fontSize, "Press R to restart", &indication1Text, renderer);
+	generateTextTexture(color, route, fontSize, "Press ESC to pause", &indication2Text, renderer);
 }
 
-void initStartMenu() {
+void initStartMenu(SDL_Renderer* renderer) {
 	SDL_Color color = { 255,255,255 };
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", 16);
-	SDL_Surface* textSurface;
-	textSurface = TTF_RenderText_Solid(font, "PONG", color);
-	pongText = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "1 Player", color);
-	player1Text = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "2 Players", color);
-	player2Text = SDL_CreateTextureFromSurface(renderer, textSurface);
-	textSurface = TTF_RenderText_Solid(font, "Exit", color);
-	menuExitText = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+	std::string route = "fonts/Oswald-BoldItalic.ttf";
+	int fontSize = SCREEN_HEIGHT / 30;
+
+	generateTextTexture(color, route, fontSize, "PONG", &pongText, renderer);
+	generateTextTexture(color, route, fontSize, "1 Player", &player1Text, renderer);
+	generateTextTexture(color, route, fontSize, "2 Players", &player2Text, renderer);
+	generateTextTexture(color, route, fontSize, "Exit", &menuExitText, renderer);
 }
 
-void drawStartMenu() {
+void drawStartMenu(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, pongText, NULL, &pongRect);
 	SDL_RenderCopy(renderer, pongText, NULL, &pongRect);
 	SDL_RenderCopy(renderer, player1Text, NULL, &player1Rect);
 	SDL_RenderCopy(renderer, player2Text, NULL, &player2Rect);
@@ -224,12 +178,12 @@ void drawStartMenu() {
 	SDL_RenderPresent(renderer);
 }
 
-void drawGameMenu() {
+void drawGameMenu(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
 	SDL_RenderFillRect(renderer, &menu);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+	SDL_SetRenderDrawColor(renderer, 250, 250, 250, 0);
 	SDL_RenderFillRect(renderer, &paddle1);
 	SDL_RenderFillRect(renderer, &paddle2);
 	SDL_RenderCopy(renderer, scoreText, NULL, &scoreRect);
@@ -240,11 +194,11 @@ void drawGameMenu() {
 	if (serve)
 		SDL_RenderCopy(renderer, textStart, NULL, &startRect);
 	else
-		SDL_RenderCopy(renderer, ballImageTexture, &ballImageRect, &ball);
+		SDL_RenderCopy(renderer, ballImageTexture, NULL, &ball);
 	SDL_RenderPresent(renderer);
 }
 
-void drawPauseMenu() {
+void drawPauseMenu(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 50, 50, 50, 0);
@@ -259,21 +213,13 @@ void drawPauseMenu() {
 	SDL_RenderPresent(renderer);
 }
 
-void countStart() {
+void countStart(SDL_Renderer* renderer) {
 	SDL_Color color = { 255,255,255 };
+	std::string route = "fonts/Oswald-Stencil.ttf";
+	int fontSize = SCREEN_HEIGHT / 15;
 
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-Stencil.ttf", 32);
-	SDL_Surface* textSurface;
 	int m = timer / 1000 + 1;
-	char a[3];
-	//it is important to the third parameter be the max count +1 to start the entry
-	SDL_itoa(m, a, 4);
-	textSurface = TTF_RenderText_Solid(font, a, color);
-	textStart = SDL_CreateTextureFromSurface(renderer, textSurface);
-
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+	generateTextTexture(color, route, fontSize, std::to_string(m), &textStart, renderer);
 }
 
 void closeMenu() {

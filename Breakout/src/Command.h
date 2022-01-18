@@ -6,10 +6,11 @@ extern SDL_Rect commandLineRect;
 extern std::string command;
 extern bool fpsActive;
 extern bool allCommands;
+extern SDL_Texture* fpsText;
+extern SDL_Rect fpsTextRect;
 
 void initCommandLine();
 void writeCommandLineText(SDL_Renderer* renderer, std::string text);
-void writeFPSText(SDL_Renderer* renderer, int fps);
 void addWordToCommand(SDL_Renderer* renderer, int wordNumber);
 void showCommandLineText(SDL_Renderer* renderer);
 void closeCommand();

@@ -1,18 +1,25 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Capsule.h"
 #include "Brick.h"
-#include "GlobalVariables.h"
 #include "Paddle.h"
 #include "Update.h"
 #include "Delete.h"
 #include "Ball.h"
 #include <SDL_ttf.h>
 #include <string>
+#include "Render.h"
+#include "Menu.h"
+#include "Brick.h"
+#include <vector>
+int actualShootSecond = 0;
 
 int totalCapsules;//capsules in level
-int *brickCapsuleIndex;
-int *powerUpType;//0 -> shoot, 1 -> extra ball
+int* brickCapsuleIndex;
+int* powerUpType;//0 -> shoot, 1 -> extra ball
 int actualCapsules = 0;//capsules actives in game
-Capsule *capsules;
+std::vector<class Capsule*> capsules;
 int capsuleWidth;
 int capsuleHeight;
 float capsuleSpeed;
@@ -20,7 +27,7 @@ float capsuleSpeed;
 //shoot
 const int maxBullets = 6;
 int actualBullets = 0;
-SDL_Rect* bullets;
+std::vector<class Bullet*> bullets;
 int bulletWidth;
 int bulletHeight;
 float bulletSpeed;
@@ -36,14 +43,12 @@ void initRandom() {
 }
 
 void initCapsuleVariables(SDL_Renderer* renderer) {
-	capsuleWidth = SCREEN_WIDTH / 36;
-	capsuleHeight = SCREEN_HEIGHT / 144;
-	capsuleSpeed = SCREEN_HEIGHT / 3.0f;
-	bulletWidth = SCREEN_WIDTH / 72;
-	bulletHeight = SCREEN_HEIGHT / 72;
-	bulletSpeed = SCREEN_HEIGHT * 60.0f / 72;
-
-	changeTextShootActiveText(0, renderer);
+	capsuleWidth = getScreenWidth() / 36;
+	capsuleHeight = getScreenHeight() / 144;
+	capsuleSpeed = getScreenHeight() / 3.0f;
+	bulletWidth = getScreenWidth() / 72;
+	bulletHeight = getScreenHeight() / 72;
+	bulletSpeed = getScreenHeight() * 60.0f / 72;
 }
 
 //check if the element exists in the array, return the index of the first finding or -1 if the element does not exists in total elements of the array
@@ -64,10 +69,13 @@ void initCapsules(int total, int max) {
 	else {
 		totalCapsules = total;
 	}
+
+	brickCapsuleIndex = NULL;
+	powerUpType = NULL;
+
 	brickCapsuleIndex = new int[totalCapsules];
 	powerUpType = new int[totalCapsules];
-	capsules = new Capsule[totalCapsules];
-	bullets = new SDL_Rect[maxBullets];
+	bullets.clear();
 	for (int i = 0; i < totalCapsules; i++) {
 		int random;
 		int elementInArray;
@@ -92,9 +100,15 @@ Capsule* deleteElementOfCapsuleArray(Capsule* array, int index, int max) {
 void checkBrickWithCapsule(int element) {
 	int capsuleIndex = elementExistsIn(brickCapsuleIndex, element, totalCapsules);
 	if (capsuleIndex > -1) {
-		capsules[actualCapsules].rect = { rectangles[element].x + rectangles[element].w / 2 - capsuleWidth / 2,
-			rectangles[element].y + rectangles[element].h / 2 - capsuleHeight / 2,capsuleWidth, capsuleHeight };
-		capsules[actualCapsules].type = powerUpType[capsuleIndex];
+		Capsule cap;
+		cap.setX(bricks.at(element)->getX() + bricks.at(element)->getW() / 2 - capsuleWidth / 2);
+		cap.setY(bricks.at(element)->getY() + bricks.at(element)->getH() / 2 - capsuleHeight / 2);
+		cap.setWidth(capsuleWidth);
+		cap.setHeight(capsuleHeight);
+		cap.setType(powerUpType[capsuleIndex]);
+
+		capsules.push_back(new Capsule(cap));
+
 		actualCapsules++;
 		brickCapsuleIndex = deleteElementOfIntArray(brickCapsuleIndex, capsuleIndex, totalCapsules);
 		powerUpType = deleteElementOfIntArray(powerUpType, capsuleIndex, totalCapsules);
@@ -103,35 +117,35 @@ void checkBrickWithCapsule(int element) {
 
 SDL_Point* getActualCapsulePercentages(SDL_Point* percentages) {
 	for (int i = 0; i < actualCapsules; i++) {
-		int centerX = capsules[i].rect.x + capsules[i].rect.w / 2;
-		int centerY = capsules[i].rect.y + capsules[i].rect.h / 2;
-		percentages[i].x = (centerX * 100) / SCREEN_WIDTH;
-		percentages[i].y = (centerY * 100) / SCREEN_HEIGHT;
+		int centerX = (int)(capsules.at(i)->getX() + capsules.at(i)->getWidth() / 2);
+		int centerY = (int)(capsules.at(i)->getY() + capsules.at(i)->getHeight() / 2);
+		percentages[i].x = (centerX * 100) / getScreenWidth();
+		percentages[i].y = (centerY * 100) / getScreenHeight();
 	}
 	return percentages;
 }
 
 SDL_Point* getActualBulletPercentages(SDL_Point* percentages) {
 	for (int i = 0; i < actualBullets; i++) {
-		int centerX = bullets[i].x + bullets[i].w / 2;
-		int centerY = bullets[i].y + bullets[i].h / 2;
-		percentages[i].x = (centerX * 100) / SCREEN_WIDTH;
-		percentages[i].y = (centerY * 100) / SCREEN_HEIGHT;
+		int centerX = (int)(bullets.at(i)->getX() + bullets.at(i)->getW() / 2);
+		int centerY = (int)(bullets.at(i)->getY() + bullets.at(i)->getH() / 2);
+		percentages[i].x = (centerX * 100) / getScreenWidth();
+		percentages[i].y = (centerY * 100) / getScreenHeight();
 	}
 	return percentages;
 }
 
 void resizeCapsules() {
 	for (int i = 0; i < actualCapsules; i++) {
-		capsules[i].rect.w = capsuleWidth;
-		capsules[i].rect.h = capsuleHeight;
+		capsules.at(i)->setWidth(capsuleWidth);
+		capsules.at(i)->setHeight(capsuleHeight);
 	}
 }
 
 void resizeBullets() {
 	for (int i = 0; i < actualBullets; i++) {
-		bullets[i].w = bulletWidth;
-		bullets[i].h = bulletHeight;
+		bullets.at(i)->setW(bulletWidth);
+		bullets.at(i)->setH(bulletHeight);
 	}
 }
 
@@ -144,7 +158,6 @@ void takeCapsule(int powerType, SDL_Renderer* renderer, float deltaTime) {
 	switch (powerType) {
 	case 0:
 		activateShoot(3.0f);
-		changeTextShootActiveText((int)shootTimer, renderer);
 		break;
 	case 1:
 		addNewBall();
@@ -155,20 +168,25 @@ void takeCapsule(int powerType, SDL_Renderer* renderer, float deltaTime) {
 void updateCapsules(SDL_Renderer* renderer, float deltaTime) {
 	for (int i = actualCapsules - 1; i >= 0; i--) {
 		//move
-		capsules[i].rect.y += (int)(capsuleSpeed * deltaTime);
-		
+		capsules.at(i)->setY(capsules.at(i)->getY() + capsuleSpeed * deltaTime);
+
 		//check collision with paddle
-		if (capsules[i].rect.y + capsules[i].rect.h >= paddle.y && SDL_HasIntersection(&capsules[i].rect, &paddle)) {
+		SDL_Rect rect;
+		rect.x = (int)capsules.at(i)->getX();
+		rect.y = (int)capsules.at(i)->getY();
+		rect.w = capsules.at(i)->getWidth();
+		rect.h = capsules.at(i)->getHeight();
+		if (capsules.at(i)->getY() + capsules.at(i)->getHeight() >= paddle.y && SDL_HasIntersection(&rect, &paddle)) {
 			//has intersection with paddle
-			takeCapsule(capsules[i].type, renderer, deltaTime);
-			deleteElementOfCapsuleArray(capsules, i, actualCapsules);
+			takeCapsule(capsules.at(i)->getType(), renderer, deltaTime);
+			deleteCapsuleElement(&capsules, capsules.at(i));
 			actualCapsules--;
 			continue;
 		}
 
 		//delete
-		if (capsules[i].rect.y > SCREEN_HEIGHT) {
-			deleteElementOfCapsuleArray(capsules, i, actualCapsules);
+		if (capsules.at(i)->getY() > getScreenHeight()) {
+			deleteCapsuleElement(&capsules, capsules.at(i));
 			actualCapsules--;
 		}
 	}
@@ -176,7 +194,7 @@ void updateCapsules(SDL_Renderer* renderer, float deltaTime) {
 
 void showCapsules(SDL_Renderer* renderer) {
 	for (int i = 0; i < actualCapsules; i++) {
-		switch (capsules[i].type) {
+		switch (capsules.at(i)->getType()) {
 		case 0:
 			SDL_SetRenderDrawColor(renderer, 36, 194, 48, 0);
 			break;
@@ -184,15 +202,22 @@ void showCapsules(SDL_Renderer* renderer) {
 			SDL_SetRenderDrawColor(renderer, 3, 90, 176, 0);
 			break;
 		}
-		SDL_RenderFillRect(renderer, &capsules[i].rect);
+		SDL_Rect rect;
+		rect.x = (int)capsules.at(i)->getX();
+		rect.y = (int)capsules.at(i)->getY();
+		rect.w = capsules.at(i)->getWidth();
+		rect.h = capsules.at(i)->getHeight();
+		SDL_RenderFillRect(renderer, &rect);
 	}
 }
 
 void restartCapsules() {
+	capsules.clear();
 	actualCapsules = 0;
 }
 
 void restartBullets() {
+	bullets.clear();
 	actualBullets = 0;
 	shootTimer = 0;
 	timerNextBullet = 0;
@@ -202,27 +227,29 @@ void restartBullets() {
 void closeCapsule() {
 	delete[] brickCapsuleIndex;
 	delete[] powerUpType;
-	delete[] capsules;
-	delete[] bullets;
 	SDL_DestroyTexture(textShootTimer);
 }
 
 void updateBullets(SDL_Renderer* renderer, float time) {
 	for (int i = actualBullets - 1; i >= 0; i--) {
-		bullets[i].y -= (int)(bulletSpeed * time);
+		bullets.at(i)->setY(bullets.at(i)->getY() - (bulletSpeed * time));
 
 		//check collision with bricks
-		if (checkRectCollisionBricks(bullets[i], renderer, false, -1)) {
+		SDL_Rect rect;
+		rect.x = (int)bullets.at(i)->getX();
+		rect.y = (int)bullets.at(i)->getY();
+		rect.w = bullets.at(i)->getW();
+		rect.h = bullets.at(i)->getH();
+		if (checkRectCollisionBricks(rect, renderer, false, -1, time)) {
 			if (actualBullets <= 0)
 				return;
-			bullets = deleteElementOfRectArray(bullets, i, actualBullets);
+			deleteBulletElement(&bullets, bullets.at(i));
 			actualBullets--;
 			continue;
 		}
-
 		//delete
-		if (bullets[i].y + bullets[i].h < 0) {
-			bullets = deleteElementOfRectArray(bullets, i, actualBullets);
+		if (bullets.at(i)->getY() + bullets.at(i)->getH() < 0) {
+			deleteBulletElement(&bullets, bullets.at(i));
 			actualBullets--;
 		}
 	}
@@ -233,7 +260,10 @@ void updateBullets(SDL_Renderer* renderer, float time) {
 		}
 		else {
 			shootTimer -= time;
-			changeTextShootActiveText((int)shootTimer, renderer);
+			if (actualShootSecond != (int)shootTimer) {
+				actualShootSecond = (int)shootTimer;
+				changeTextShootActiveText(actualShootSecond, renderer);
+			}
 		}
 		if (timerNextBullet > 0)
 			timerNextBullet -= time;
@@ -243,7 +273,12 @@ void updateBullets(SDL_Renderer* renderer, float time) {
 void showBullets(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(renderer, 48, 3, 176, 0);
 	for (int i = 0; i < actualBullets; i++) {
-		SDL_RenderFillRect(renderer, &bullets[i]);
+		SDL_Rect rect;
+		rect.x = (int)bullets.at(i)->getX();
+		rect.y = (int)bullets.at(i)->getY();
+		rect.w = bullets.at(i)->getW();
+		rect.h = bullets.at(i)->getH();
+		SDL_RenderFillRect(renderer, &rect);
 	}
 }
 
@@ -253,35 +288,35 @@ void showTextScore(SDL_Renderer* renderer) {
 
 void shoot() {
 	if (paddleShoot && timerNextBullet <= 0 && actualBullets < maxBullets - 1) {
-		
 		timerNextBullet = 0.3f;
-
 		//add 2 bullets on the paddle
-		bullets[actualBullets] = { 
-			paddle.x + paddle.w / 3 - bulletWidth / 2,
-			paddle.y - bulletHeight,
-			bulletWidth,
-			bulletHeight
-		};
+		Bullet bullet;
+		bullet.setX((float)(paddle.x + paddle.w / 3 - bulletWidth / 2));
+		bullet.setY((float)(paddle.y - bulletHeight));
+		bullet.setW(bulletWidth);
+		bullet.setH(bulletHeight);
+		bullets.push_back(new Bullet(bullet));
 		actualBullets++;
-		bullets[actualBullets] = {
-			paddle.x + paddle.w / 3 + paddle.w / 3 - bulletWidth / 2,
-			paddle.y - bulletHeight,
-			bulletWidth,
-			bulletHeight
-		};
+		bullet.setX((float)(paddle.x + paddle.w / 3 + paddle.w / 3 - bulletWidth / 2));
+		bullet.setY((float)(paddle.y - bulletHeight));
+		bullets.push_back(new Bullet(bullet));
 		actualBullets++;
 	}
 }
 
 void changeTextShootActiveText(int seconds, SDL_Renderer* renderer) {
-	TTF_Font* font = TTF_OpenFont("fonts/Oswald-BoldItalic.ttf", SCREEN_HEIGHT / 30);
-	SDL_Surface* textSurface;
-	SDL_Color color = { 255,255,255 };
 	std::string a = "Shoot: " + std::to_string(seconds) + " ";
-	textSurface = TTF_RenderText_Solid(font,a.c_str(), color);
-	textShootTimer = SDL_CreateTextureFromSurface(renderer, textSurface);
-	SDL_FreeSurface(textSurface);
-	textSurface = nullptr;
-	TTF_CloseFont(font);
+	generateTextTexture({ 255,255,255,0 }, "fonts/Oswald-BoldItalic.ttf", getScreenHeight() / 30, a, &textShootTimer, renderer);
+}
+
+void deleteCapsuleElement(std::vector<class Capsule*>* caps, class Capsule* cap) {
+	auto index = std::find(caps->begin(), caps->end(), cap);
+	if (index != caps->end())
+		caps->erase(index);
+}
+
+void deleteBulletElement(std::vector<class Bullet*>* bulls, class Bullet* bull) {
+	auto index = std::find(bulls->begin(), bulls->end(), bull);
+	if (index != bulls->end())
+		bulls->erase(index);
 }

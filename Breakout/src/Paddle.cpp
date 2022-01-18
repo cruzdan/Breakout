@@ -1,19 +1,20 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
-#include "GlobalVariables.h"
 #include "Menu.h"
 
 SDL_Rect paddle;
-float paddleSpeed, maxSpeed, changeSpeed;
+float paddleSpeed = 0, maxSpeed, changeSpeed;
 
 void initPaddle() {
-	paddleSpeed = 0;
-	maxSpeed = (SCREEN_WIDTH / 72) * 5 * 60.0f;
-	changeSpeed = SCREEN_WIDTH * 25.0f / 288;
+	maxSpeed = (getScreenWidth() / 72) * 5 * 60.0f;
+	changeSpeed = getScreenWidth() * 25.0f / 288;
 
-	paddle.w = boardWidth / 2;
-	paddle.h = SCREEN_HEIGHT / 60;
+	paddle.w = boardWidth / 5;
+	paddle.h = getScreenHeight() / 60;
 	paddle.x = boardWidth / 2 - paddle.w / 2;
-	paddle.y = int(SCREEN_HEIGHT * 0.9);
+	paddle.y = int(getScreenHeight() * 0.9);
 }
 
 void centerPaddle() {
@@ -48,7 +49,7 @@ void updatePaddle(float deltaTime) {
 		else
 			paddleSpeed = 0;
 	}
-	else if (paddleSpeed != 0){
+	else if (paddleSpeed != 0) {
 		if (paddle.x + paddleSpeed * deltaTime > 0) {
 			paddle.x += (int)(paddleSpeed * deltaTime);
 			if (paddleSpeed + changeSpeed / 2 < 0)
@@ -63,13 +64,13 @@ void updatePaddle(float deltaTime) {
 
 //put the rect in the x and y percentage of the screen
 void setWindowPaddleCoordinates(int percentageX) {
-	paddle.x = (percentageX * SCREEN_WIDTH) / 100 - paddle.w / 2;
+	paddle.x = (percentageX * getScreenWidth()) / 100 - paddle.w / 2;
 }
 
 //get the coordinates in percentage of the screen of the rect(center)
 void getActualPadddleCoordinates(int* x) {
 	int centerRectX = paddle.x + paddle.w / 2;
-	*x = 100 * centerRectX / SCREEN_WIDTH;
+	*x = 100 * centerRectX / getScreenWidth();
 }
 
 //get the actual speed paddle in termns of changeSpeed
@@ -83,7 +84,7 @@ void setMultiplicatorPaddleSpeed(int paddleMultiplicator) {
 }
 
 void incrementPaddleSpeed() {
-	changeSpeed += SCREEN_WIDTH * 60 / 288;
+	changeSpeed += getScreenWidth() * 60 / 288;
 }
 
 void decrementPaddleSpeed() {

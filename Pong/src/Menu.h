@@ -13,17 +13,17 @@ extern SDL_Rect menuExitRect;
 void assignPropertiesPauseMenu(SDL_Rect* rect, int y);
 void assignProperties(SDL_Rect* rect, int w, int h, int x, int y);
 //update the score
-void updateScore();
-void initMenu();
+void updateScore(SDL_Renderer* renderer);
+void initMenu(SDL_Renderer* renderer);
 //init Pause menu
-void initPauseMenu();
+void initPauseMenu(SDL_Renderer* renderer);
 //init Game menu
-void initGameMenu();
+void initGameMenu(SDL_Renderer* renderer);
 //init Start menu
-void initStartMenu();
-void drawStartMenu();
-void drawGameMenu();
-void drawPauseMenu();
+void initStartMenu(SDL_Renderer* renderer);
+void drawStartMenu(SDL_Renderer* renderer);
+void drawGameMenu(SDL_Renderer* renderer);
+void drawPauseMenu(SDL_Renderer* renderer);
 //this method writes the timer square to start the game
-void countStart();
+void countStart(SDL_Renderer* renderer);
 void closeMenu();

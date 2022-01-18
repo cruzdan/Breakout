@@ -1,5 +1,4 @@
 #pragma once
-#include <SDL.h>
 extern SDL_Rect paddle;
 extern float paddleSpeed;
 void centerPaddle();

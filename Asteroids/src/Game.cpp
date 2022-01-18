@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <iostream>
@@ -14,10 +17,12 @@ Game::Game()
 	:window(nullptr),
 	renderer(nullptr),
 	gameOver(false),
+	menu(nullptr),
+	ship(nullptr),
 	lifes(3),
 	ticksCount(0),
-	SCREEN_WIDTH(720),
-	SCREEN_HEIGHT(480),
+	SCREEN_WIDTH(1080),
+	SCREEN_HEIGHT(720),
 	timerAsteroids(0)
 {
 }
@@ -52,13 +57,17 @@ bool Game::init() {
 	loadImage(renderer);
 	menu = new Menu(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 	ship = new Ship();
-	ship->setMaxSpeed((float)SCREEN_WIDTH * 60.0f / 144);
-	ship->setChangeVel((float)SCREEN_WIDTH / 60);
-	int shipW = SCREEN_WIDTH / 25;
-	int shipH = SCREEN_HEIGHT / 10;
-	ship->setRect(SCREEN_WIDTH / 2 - shipW / 2, SCREEN_HEIGHT / 2 - shipH / 2, shipW, shipH);
+	ship->setMaxSpeed((float)SCREEN_WIDTH * 60.0f / 288);
+	ship->setChangeVel((float)SCREEN_WIDTH / 120);
+	int shipW = SCREEN_WIDTH / 50;
+	int shipH = SCREEN_HEIGHT / 20;
+	ship->setX((float)(SCREEN_WIDTH / 2 - shipW / 2));
+	ship->setY((float)(SCREEN_HEIGHT / 2 - shipH / 2));
+	ship->setW(shipW);
+	ship->setH(shipH);
 	ticksCount = SDL_GetTicks();
 
+	SDL_Log("start process is completed");
 	return true;
 }
 
@@ -77,7 +86,7 @@ void Game::show() {
 		for (auto bullet : ship->getBullets()) {
 			bullet->showBullet(renderer);
 		}
-		ship->showMenuBullets(renderer, SCREEN_WIDTH, SCREEN_HEIGHT, ship->getRect().w / 2, ship->getRect().h / 2);
+		ship->showMenuBullets(renderer, SCREEN_WIDTH, SCREEN_HEIGHT, ship->getW() / 2, ship->getH() / 2);
 		break;
 	case 2:
 		menu->showMenu2(renderer);
@@ -96,18 +105,23 @@ void Game::collisionBulletAsteroids() {
 				std::size_t j = asteroids.size() - 1;
 				while (true) {
 
-					SDL_Rect rect = asteroids[j]->getRect();
-					SDL_Rect shipRect = ship->getBullets()[i]->getRect();
+					SDL_Rect rect = { (int)asteroids[j]->getX(),(int)asteroids[j]->getY(),asteroids[j]->getW(),asteroids[j]->getH() };
+					SDL_Rect shipRect;
+					Bullet* bullet = ship->getBullets()[i];
+					shipRect.x = (int)bullet->getX();
+					shipRect.y = (int)bullet->getY();
+					shipRect.w = bullet->getW();
+					shipRect.h = bullet->getH();
 					if (SDL_HasIntersection(&rect, &shipRect)) {
 
 						ship->deleteBullet(ship->getBullets()[i]);
 
-						int lastw, lasth, lastx, lasty;
-						float lastSpeed, lastOAngle;
-						lastw = asteroids[j]->getRect().w;
-						lasth = asteroids[j]->getRect().h;
-						lastx = asteroids[j]->getRect().x;
-						lasty = asteroids[j]->getRect().y;
+						int lastw, lasth;
+						float lastSpeed, lastOAngle, lastx, lasty;
+						lastw = asteroids[j]->getW();
+						lasth = asteroids[j]->getH();
+						lastx = asteroids[j]->getX();
+						lasty = asteroids[j]->getY();
 						lastOAngle = asteroids[j]->getOriginalAngle();
 						lastSpeed = asteroids[j]->getSpeed();
 						deleteAsteroid(asteroids[j]);
@@ -117,19 +131,22 @@ void Game::collisionBulletAsteroids() {
 							lifes++;
 
 						//the big asteroids spawn 2 tiny asteroids
-						if (lastw > SCREEN_HEIGHT / 4) {
+						if (lastw > SCREEN_HEIGHT / 8) {
 							//first asteroid
-							int newX, newY, newWidth, newHeight;
-							float newAngle;
+							float newX, newY, newAngle;
+							int newWidth, newHeight;
 							newWidth = lastw / 2;
 							newHeight = newWidth;
-							newX = lastx + lastw / 2 - newWidth / 2;
-							newY = lasty + lasth / 2 - newHeight / 2;
+							newX = (float)(lastx + lastw / 2 - newWidth / 2);
+							newY = (float)(lasty + lasth / 2 - newHeight / 2);
 							newAngle = lastOAngle - 22;
 
 							Asteroid* asteroid1 = new Asteroid();
 							asteroid1->setAngle(0);
-							asteroid1->setRect({ newX,newY,newWidth,newHeight });
+							asteroid1->setX(newX);
+							asteroid1->setY(newY);
+							asteroid1->setW(newWidth);
+							asteroid1->setH(newHeight);
 							asteroid1->setMulX(cos(newAngle * PI / 180));
 							asteroid1->setMulY(sin(newAngle * PI / 180));
 							asteroid1->setSpeed(lastSpeed);
@@ -139,7 +156,10 @@ void Game::collisionBulletAsteroids() {
 							Asteroid* asteroid2 = new Asteroid();
 							newAngle += 45;
 							asteroid2->setAngle(0);
-							asteroid2->setRect({ newX,newY,newWidth,newHeight });
+							asteroid2->setX(newX);
+							asteroid2->setY(newY);
+							asteroid2->setW(newWidth);
+							asteroid2->setH(newHeight);
 							asteroid2->setMulX(cos(newAngle * PI / 180));
 							asteroid2->setMulY(sin(newAngle * PI / 180));
 							asteroid2->setSpeed(lastSpeed);
@@ -161,10 +181,15 @@ void Game::collisionBulletAsteroids() {
 	}
 }
 
-void Game::collisionShipAsteroids(SDL_Renderer* renderer, SDL_Rect ship) {
+void Game::collisionShipAsteroids(SDL_Renderer* renderer, int x, int y, int w, int h) {
 	int i = 0;
+	SDL_Rect ship;
+	ship.x = x;
+	ship.y = y;
+	ship.w = w;
+	ship.h = h;
 	for (auto ast : asteroids) {
-		SDL_Rect rect = ast->getRect();
+		SDL_Rect rect = { (int)ast->getX(),(int)ast->getY(),ast->getW(),ast->getH() };
 		if (SDL_HasIntersection(&ship, &rect)) {
 			lifes--;
 			restart();
@@ -180,9 +205,14 @@ void Game::update(float deltaTime) {
 		std::size_t i = ship->getBullets().size() - 1;
 		while (true) {
 			ship->getBullets()[i]->moveBullet(deltaTime);
-			if (checkRectOutOfScreen(ship->getBullets()[i]->getRect()))
+			SDL_Rect rect;
+			Bullet* bullet = ship->getBullets()[i];
+			rect.x = (int)bullet->getX();
+			rect.y = (int)bullet->getY();
+			rect.w = bullet->getW();
+			rect.h = bullet->getH();
+			if (checkRectOutOfScreen(rect))
 				ship->deleteBullet(ship->getBullets()[i]);
-
 			if (i == 0)
 				break;
 			else
@@ -194,7 +224,8 @@ void Game::update(float deltaTime) {
 		std::size_t i = asteroids.size() - 1;
 		while (true) {
 			asteroids[i]->moveAsteroid(deltaTime);
-			if (checkRectOutOfScreen(asteroids[i]->getRect()))
+			SDL_Rect rect = { (int)asteroids[i]->getX(),(int)asteroids[i]->getY(),asteroids[i]->getW(),asteroids[i]->getH() };
+			if (checkRectOutOfScreen(rect))
 				deleteAsteroid(asteroids[i]);
 			if (i == 0)
 				break;
@@ -207,8 +238,9 @@ void Game::update(float deltaTime) {
 	ship->decrementVelocity(deltaTime);
 	checkNewAsteroid(deltaTime);
 	collisionBulletAsteroids();
-	collisionShipAsteroids(renderer, ship->getRect());
+	collisionShipAsteroids(renderer, (int)ship->getX(), (int)ship->getY(), ship->getW(), ship->getH());
 	ship->incrementBullet(deltaTime);
+	ship->downShipShoot(deltaTime);
 }
 
 void Game::closeGame() {
@@ -222,8 +254,8 @@ void Game::closeGame() {
 
 void Game::loop() {
 	while (!gameOver) {
-		int fps = 30;
-		while (!SDL_TICKS_PASSED(SDL_GetTicks(), ticksCount + (1000 / fps) ))
+		int fps = 60;
+		while (!SDL_TICKS_PASSED(SDL_GetTicks(), ticksCount + (1000 / fps)))
 			;
 
 		float deltaTime = (SDL_GetTicks() - ticksCount) / 1000.0f;
@@ -263,55 +295,62 @@ void Game::deleteAsteroid(class Asteroid* asteroid) {
 }
 
 void Game::generateAsteroid(int width, int height) {
-	class Asteroid* asteroid = new Asteroid();
-	SDL_Rect rect;
+	Asteroid* asteroid = new Asteroid();
 
-	rect.w = rand() % (height / 4) + height / 24;
-	rect.h = rect.w;
-	float enemyAngle = (float)(rand() % 90);
+	int newW = (rand() % (height / 4) + height / 24) / 2;
+	int newH = newW;
+	int newX;
+	int newY;
+	asteroid->setW(newW);
+	asteroid->setH(newH);
+	double enemyAngle = rand() % 90;
 
 	switch (rand() % 4) {
 	case 0:
 		//the asteroid appears on the superior side
-		rect.x = rand() % height;
-		rect.y = 0;
-		asteroid->setRect(rect);
+		newX = rand() % height;
+		newY = 1 - newH;
+		asteroid->setX((float)newX);
+		asteroid->setY((float)newY);
 		asteroid->setMulX(cos((enemyAngle + 45) * PI / 180));
 		asteroid->setMulY(sin((enemyAngle + 45) * PI / 180));
-		asteroid->setAngle(enemyAngle + 45 - 90);
-		asteroid->setOriginalAngle(enemyAngle + 45);
+		asteroid->setAngle((float)(enemyAngle + 45 - 90));
+		asteroid->setOriginalAngle((float)(enemyAngle + 45));
 		break;
 	case 1:
 		//the asteroid appears on the left side
-		rect.x = 0;
-		rect.y = rand() % height;
-		asteroid->setRect(rect);
+		newX = 1 - newW;
+		newY = rand() % height;
+		asteroid->setX((float)newX);
+		asteroid->setY((float)newY);
 		asteroid->setMulX(cos((enemyAngle - 45) * PI / 180));
 		asteroid->setMulY(sin((enemyAngle - 45) * PI / 180));
-		asteroid->setAngle(enemyAngle - 45 - 90);
-		asteroid->setOriginalAngle(enemyAngle - 45);
+		asteroid->setAngle((float)(enemyAngle - 45 - 90));
+		asteroid->setOriginalAngle((float)(enemyAngle - 45));
 		break;
 	case 2:
 		//the asteroid appears on the inferior side
-		rect.x = rand() % width;
-		rect.y = height - rect.h;
-		asteroid->setRect(rect);
+		newX = rand() % width;
+		newY = height - 1;
+		asteroid->setX((float)newX);
+		asteroid->setY((float)newY);
 		asteroid->setMulX(cos((enemyAngle + 225) * PI / 180));
 		asteroid->setMulY(sin((enemyAngle + 225) * PI / 180));
-		asteroid->setAngle(enemyAngle + 225 - 90);
-		asteroid->setOriginalAngle(enemyAngle + 225);
+		asteroid->setAngle((float)(enemyAngle + 225 - 90));
+		asteroid->setOriginalAngle((float)(enemyAngle + 225));
 		break;
 	case 3:
 		//the asteroid appears on the right side
-		rect.x = width - rect.w;
-		rect.y = rand() % height;
-		asteroid->setRect(rect);
+		newX = width - 1;
+		newY = rand() % height;
+		asteroid->setX((float)newX);
+		asteroid->setY((float)newY);
 		asteroid->setMulX(cos((enemyAngle + 135) * PI / 180));
 		asteroid->setMulY(sin((enemyAngle + 135) * PI / 180));
-		asteroid->setOriginalAngle(enemyAngle + 135);
+		asteroid->setOriginalAngle((float)(enemyAngle + 135));
 		break;
 	}
-	asteroid->setSpeed(((float)(rand() % (height / 64) + 1)) * 60);
+	asteroid->setSpeed(((float)(rand() % (height / 64) + 1)) * 30);
 	addAsteroid(asteroid);
 }
 
@@ -340,19 +379,19 @@ bool Game::checkRectOutOfScreen(SDL_Rect rect) {
 
 //this method moves the ship to the contrary side when the ship are on the edges of the game
 void Game::checkShip() {
-	if (ship->getRect().x + ship->getRect().w < 0)
-		ship->setRectX(SCREEN_WIDTH - 1);
-	else if (ship->getRect().x >= SCREEN_WIDTH)
-		ship->setRectX(-ship->getRect().w);
-	if (ship->getRect().y + ship->getRect().h < 0)
-		ship->setRectY(SCREEN_HEIGHT - 1);
-	else if (ship->getRect().y >= SCREEN_HEIGHT)
-		ship->setRectY(-ship->getRect().h);
+	if (ship->getX() + ship->getW() < 0)
+		ship->setX((float)(SCREEN_WIDTH - 1));
+	else if (ship->getX() >= SCREEN_WIDTH)
+		ship->setX((float)(-ship->getW()));
+	if (ship->getY() + ship->getH() < 0)
+		ship->setY((float)(SCREEN_HEIGHT - 1));
+	else if (ship->getY() >= SCREEN_HEIGHT)
+		ship->setY((float)(-ship->getH()));
 }
 
 void Game::restartShip() {
-	ship->setRectX(SCREEN_WIDTH / 2 - ship->getRect().w / 2);
-	ship->setRectY(SCREEN_HEIGHT / 2 - ship->getRect().h / 2);
+	ship->setX((float)(SCREEN_WIDTH / 2 - ship->getW() / 2));
+	ship->setY((float)(SCREEN_HEIGHT / 2 - ship->getH() / 2));
 	ship->setAngle(0);
 	ship->setSpeed(0);
 }

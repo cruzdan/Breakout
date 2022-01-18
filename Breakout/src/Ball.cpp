@@ -1,122 +1,130 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include <SDL_image.h>
-#include <iostream>
 #include "Menu.h"
 #include "Paddle.h"
-#include "GlobalVariables.h"
+#include <vector>
+#include "Ball.h"
 
 const int maxBalls = 8;
-
+std::vector<class Ball*> balls;
 int actualBalls = 1;
-SDL_Rect* ballRect;
 SDL_Texture* ballTexture;
-float* ballSpeedX;
-float* ballSpeedY;
 float ballSpeedChangeX;
 float ballSPeedChangeY;
 float maxBallSpeed;
 float firstSpeedChangeX;
 float firstSpeedChangeY;
 
-void centerBall(int ballIndex) {
-	ballRect[ballIndex].x = paddle.x + paddle.w / 2 - ballRect[ballIndex].w / 2;
-	ballRect[ballIndex].y = paddle.y - ballRect[ballIndex].h;
-}
-
 void closeTextureBall() {
 	SDL_DestroyTexture(ballTexture);
-	delete[] ballRect;
-	delete[] ballSpeedX;
-	delete[] ballSpeedY;
 }
 
-void initBallSpeed(int ballIndex) {
+void initBallSpeed(Ball* ball) {
 	if (rand() % 2 < 1)
-		ballSpeedX[ballIndex] = ballSpeedChangeX + ballSpeedChangeX;
+		ball->setSpeedX(ballSpeedChangeX + ballSpeedChangeX);
 	else
-		ballSpeedX[ballIndex] = -(ballSpeedChangeX + ballSpeedChangeX);
-	ballSpeedY[ballIndex] = -(ballSPeedChangeY + ballSPeedChangeY);
+		ball->setSpeedX(-(ballSpeedChangeX + ballSpeedChangeX));
+	ball->setSpeedY(-(ballSPeedChangeY + ballSPeedChangeY));
 }
 
 void addNewBall() {
 	if (actualBalls < maxBalls) {
-		centerBall(actualBalls);
-		initBallSpeed(actualBalls);
+		int ballWidth = boardWidth / 40;
+		int ballHeight = getScreenHeight() / 30;
+		class Ball ball;
+		ball.setX((float)(paddle.x + paddle.w / 2 - ballWidth / 2));
+		ball.setY((float)(paddle.y - ballHeight));
+		ball.setWidth(ballWidth);
+		ball.setHeight(ballHeight);
+		balls.push_back(new Ball(ball));
+		initBallSpeed(balls.at(actualBalls));
 		actualBalls++;
 	}
 }
 
 void initBall() {
-	ballRect = new SDL_Rect[maxBalls];
-	ballSpeedX = new float[maxBalls];
-	ballSpeedY = new float[maxBalls];
-	for (int i = 0; i < maxBalls; i++) {
-		ballRect[i].w = boardWidth / 40;
-		ballRect[i].h = SCREEN_HEIGHT / 30;
-	}
-
-	ballSpeedChangeX = (SCREEN_WIDTH * 50.0f / 256);
-	ballSPeedChangeY = (SCREEN_HEIGHT * 50.0f / 144);
-
+	balls.clear();
+	ballSpeedChangeX = (getScreenWidth() * 50.0f / 256);
+	ballSPeedChangeY = (getScreenHeight() * 50.0f / 144);
 	firstSpeedChangeX = ballSpeedChangeX / 2.0f;
 	firstSpeedChangeY = ballSPeedChangeY / 2.0f;
-
-	initBallSpeed(0);
-	ballRect[0].x = boardWidth / 2 - ballRect[0].w / 2;
-	ballRect[0].y = paddle.y - ballRect[0].h;
-
+	int ballWidth = boardWidth / 40;
+	int ballHeight = getScreenHeight() / 30;
+	Ball ball;
+	ball.setX((float)(boardWidth / 2 - ballWidth / 2));
+	ball.setY((float)(paddle.y - ballHeight));
+	ball.setWidth(ballWidth);
+	ball.setHeight(ballHeight);
+	balls.push_back(new Ball(ball));
+	initBallSpeed(balls.at(0));
 	maxBallSpeed = ballSpeedChangeX * 5.0f;
 }
 
 SDL_Point* getActualBallPercentages(SDL_Point* percentages) {
-	for (int i = 0; i < actualBalls; i++) {
-		int centerX = ballRect[i].x + ballRect[i].w / 2;
-		int centerY = ballRect[i].y + ballRect[i].h / 2;
-		percentages[i].x = (centerX * 100) / SCREEN_WIDTH;
-		percentages[i].y = (centerY * 100) / SCREEN_HEIGHT;
+	int i = 0;
+	for (auto ball : balls) {
+		int centerX = (int)(ball->getX() + ball->getWidth() / 2);
+		int centerY = (int)(ball->getY() + ball->getHeight() / 2);
+		percentages[i].x = (centerX * 100) / getScreenWidth();
+		percentages[i].y = (centerY * 100) / getScreenHeight();
+		i++;
 	}
 	return percentages;
 }
 
 void reziseBalls() {
-	for (int i = 0; i < maxBalls; i++) {
-		ballRect[i].w = boardWidth / 40;
-		ballRect[i].h = SCREEN_HEIGHT / 30;
+	for (auto ball : balls) {
+		ball->setWidth(boardWidth / 40);
+		ball->setHeight(getScreenHeight() / 30);
 	}
 }
 
-void changeBallMovementWithBrick(SDL_Rect brick, int ballIndex) {
-	if (ballSpeedY[ballIndex] > 0 && ballRect[ballIndex].y < brick.y) {
-		ballSpeedY[ballIndex] = -ballSpeedY[ballIndex];
+void changeBallMovementWithBrick(SDL_Rect brick, Ball* ball, float time) {
+	if (ball->getSpeedY() > 0 && ball->getY() < brick.y) {
+		ball->setSpeedY(-ball->getSpeedY());
+		ball->setY(ball->getY() + ball->getSpeedY() * time);
 	}
-	else if (ballRect[ballIndex].y + ballRect[ballIndex].h > brick.y + brick.h) {
-		ballSpeedY[ballIndex] = -ballSpeedY[ballIndex];
+	else if (ball->getSpeedY() <= 0 && ball->getY() + ball->getHeight() > brick.y + brick.h) {
+		ball->setSpeedY(-ball->getSpeedY());
+		ball->setY(ball->getY() + ball->getSpeedY() * time);
 	}
-	else if (ballSpeedX[ballIndex] > 0 && ballRect[ballIndex].x < brick.x) {
-		ballSpeedX[ballIndex] = -ballSpeedX[ballIndex];
+	if (ball->getSpeedX() > 0 && ball->getX() < brick.x) {
+		ball->setSpeedX(-ball->getSpeedX());
+		ball->setX(ball->getX() + ball->getSpeedX() * time);
 	}
-	else if (ballRect[ballIndex].x + ballRect[ballIndex].w > brick.x + brick.w) {
-		ballSpeedX[ballIndex] = -ballSpeedX[ballIndex];
+	else if (ball->getSpeedX() <= 0 && ball->getX() + ball->getWidth() > brick.x + brick.w) {
+		ball->setSpeedX(-ball->getSpeedX());
+		ball->setX(ball->getX() + ball->getSpeedX() * time);
 	}
 }
 
 void showBalls(SDL_Renderer* renderer) {
-	for (int i = 0; i < actualBalls; i++) {
-		SDL_RenderCopy(renderer, ballTexture, NULL, &ballRect[i]);
+	for (auto ball : balls) {
+		SDL_Rect rect;
+		rect.x = (int)ball->getX();
+		rect.y = (int)ball->getY();
+		rect.w = ball->getWidth();
+		rect.h = ball->getHeight();
+		SDL_RenderCopy(renderer, ballTexture, NULL, &rect);
 	}
 }
 
 void incrementBallSpeed() {
 	SDL_Point* speedMultiplies = new SDL_Point[actualBalls];
 	for (int i = 0; i < actualBalls; i++) {
-		speedMultiplies[i].x = (int)(ballSpeedX[i] / ballSpeedChangeX);
-		speedMultiplies[i].y = (int)(ballSpeedY[i] / ballSPeedChangeY);
+		auto ball = balls.at(i);
+		speedMultiplies[i].x = (int)(ball->getSpeedX() / ballSpeedChangeX);
+		speedMultiplies[i].y = (int)(ball->getSpeedY() / ballSPeedChangeY);
 	}
 	ballSpeedChangeX += firstSpeedChangeX;
 	ballSPeedChangeY += firstSpeedChangeY;
 	for (int i = 0; i < actualBalls; i++) {
-		ballSpeedX[i] = speedMultiplies[i].x * ballSpeedChangeX;
-		ballSpeedY[i] = speedMultiplies[i].y * ballSPeedChangeY;
+		auto ball = balls.at(i);
+		ball->setSpeedX(speedMultiplies[i].x * ballSpeedChangeX);
+		ball->setSpeedY(speedMultiplies[i].y * ballSPeedChangeY);
 	}
 	delete[] speedMultiplies;
 }
@@ -124,64 +132,88 @@ void incrementBallSpeed() {
 void decrementBallSpeed() {
 	SDL_Point* speedMultiplies = new SDL_Point[actualBalls];
 	for (int i = 0; i < actualBalls; i++) {
-		speedMultiplies[i].x = (int)(ballSpeedX[i] / ballSpeedChangeX);
-		speedMultiplies[i].y = (int)(ballSpeedY[i] / ballSPeedChangeY);
+		auto ball = balls.at(i);
+		speedMultiplies[i].x = (int)(ball->getSpeedX() / ballSpeedChangeX);
+		speedMultiplies[i].y = (int)(ball->getSpeedY() / ballSPeedChangeY);
 	}
 	if (ballSpeedChangeX - firstSpeedChangeX > 0 && ballSPeedChangeY - firstSpeedChangeY > 0) {
 		ballSpeedChangeX -= firstSpeedChangeX;
 		ballSPeedChangeY -= firstSpeedChangeY;
 	}
 	for (int i = 0; i < actualBalls; i++) {
-		ballSpeedX[i] = speedMultiplies[i].x * ballSpeedChangeX;
-		ballSpeedY[i] = speedMultiplies[i].y * ballSPeedChangeY;
+		auto ball = balls.at(i);
+		ball->setSpeedX(speedMultiplies[i].x * ballSpeedChangeX);
+		ball->setSpeedY(speedMultiplies[i].y * ballSPeedChangeY);
 	}
 	delete[] speedMultiplies;
 }
 
-//get the actual ball speed in termns of ballSpeedChangeX and ballSPeedChangeY
+//get the actual ball speed in termns of ballSpeedChange
 SDL_Point* getBallSpeedMultiplicators(SDL_Point* ballMultiplicator) {
-	for (int i = 0; i < actualBalls; i++) {
-		ballMultiplicator[i].x = (int)(ballSpeedX[i] / ballSpeedChangeX);
-		ballMultiplicator[i].y = (int)(ballSpeedY[i] / ballSPeedChangeY);
+	int i = 0;
+	for (auto ball : balls) {
+		ballMultiplicator[i].x = (int)(ball->getSpeedX() / ballSpeedChangeX);
+		ballMultiplicator[i].y = (int)(ball->getSpeedY() / ballSPeedChangeY);
+		i++;
 	}
 	return ballMultiplicator;
 }
 
 //get the actual ball speed in termns of Width and height
 float* getBallSpeedMultiplicatorsX(float* ballMultiplicatorX) {
-	for (int i = 0; i < actualBalls; i++) {
-		ballMultiplicatorX[i] = ballSpeedX[i] / (float)SCREEN_WIDTH;
+	int i = 0;
+	for (auto ball : balls) {
+		ballMultiplicatorX[i] = ball->getSpeedX() / (float)getScreenWidth();
+		i++;
 	}
 	return ballMultiplicatorX;
 }
 
 float* getBallSpeedMultiplicatorsY(float* ballMultiplicatorY) {
-	for (int i = 0; i < actualBalls; i++) {
-		ballMultiplicatorY[i] = ballSpeedY[i] / (float)SCREEN_HEIGHT;
+	int i = 0;
+	for (auto ball : balls) {
+		ballMultiplicatorY[i] = ball->getSpeedY() / (float)getScreenHeight();
+		i++;
 	}
 	return ballMultiplicatorY;
 }
 
-
-
 //set the paddleSpeed in a multiplicator of width and height
 void setMultiplicatorBallSpeed(float* ballMultiplicatorX, float* ballMultiplicatorY) {
-	for (int i = 0; i < actualBalls; i++) {
-		ballSpeedX[i] = ballMultiplicatorX[i] * SCREEN_WIDTH;
-		ballSpeedY[i] = ballMultiplicatorY[i] * SCREEN_HEIGHT;
+	int i = 0;
+	for (auto ball : balls) {
+		ball->setSpeedX(ballMultiplicatorX[i] * getScreenWidth());
+		ball->setSpeedY(ballMultiplicatorY[i] * getScreenHeight());
+		i++;
 	}
 }
 
 //set the paddleSpeed in a multiplicator of ballSPeedChange
 void setMultiplicatorBallSpeed(SDL_Point* ballMultiplicator) {
-	for (int i = 0; i < actualBalls; i++) {
-		ballSpeedX[i] = ballMultiplicator[i].x * ballSpeedChangeX;
-		ballSpeedY[i] = ballMultiplicator[i].y * ballSPeedChangeY;
+	int i = 0;
+	for (auto ball : balls) {
+		ball->setSpeedX(ballMultiplicator[i].x * ballSpeedChangeX);
+		ball->setSpeedY(ballMultiplicator[i].y * ballSPeedChangeY);
+		i++;
 	}
 }
 
 void restartBall() {
+	balls.clear();
+	int ballWidth = boardWidth / 40;
+	int ballHeight = getScreenHeight() / 30;
+	Ball ball;
+	ball.setX((float)(boardWidth / 2 - ballWidth / 2));
+	ball.setY((float)(paddle.y - ballHeight));
+	ball.setWidth(ballWidth);
+	ball.setHeight(ballHeight);
+	balls.push_back(new Ball(ball));
+	initBallSpeed(balls.at(0));
 	actualBalls = 1;
-	centerBall(0);
-	initBallSpeed(0);
+}
+
+void deleteBallElement(std::vector<class Ball*>* balls, class Ball* ball) {
+	auto index = std::find(balls->begin(), balls->end(), ball);
+	if (index != balls->end())
+		balls->erase(index);
 }

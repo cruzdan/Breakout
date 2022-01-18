@@ -10,8 +10,14 @@ public:
 	void setMulY(const double mul) { multiplicatorY = mul; }
 	float getAngle() const { return angle; }
 	void setAngle(const float ang) { angle = ang; }
-	SDL_Rect getRect() const { return rect; }
-	void setRect(const int x, const int y, const int w, const int h) { rect = { x,y,w,h }; }
+	float getX() const { return x; }
+	void setX(const float newX) { x = newX; }
+	float getY() const { return y; }
+	void setY(const float newY) { y = newY; }
+	int getW() const { return w; }
+	void setW(const int newW) { w = newW; }
+	int getH() const { return h; }
+	void setH(const int newH) { h = newH; }
 	float getSpeed() const { return speed; }
 	void setSpeed(const float newSpeed) { speed = newSpeed; }
 
@@ -22,6 +28,9 @@ private:
 	double multiplicatorX; //distance to move the bullet in X
 	double multiplicatorY; //distance to move the bullet in Y
 	float angle;
-	SDL_Rect rect;
+	float x;
+	float y;
+	int w;
+	int h;
 	float speed;
 };

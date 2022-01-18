@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include <SDL.h>
 #include "Menu.h"
 #include "Ball.h"
@@ -9,28 +12,24 @@
 #include "Show.h"
 #include "Brick.h"
 #include "Paddle.h"
-#include "Image.h"
+#include "Render.h"
 #include "Capsule.h"
 #include "Command.h"
 
-SDL_Window* window;
-SDL_Renderer* renderer;
-
 int main(int argc, char* args[]) {
+	SDL_Window* window;
+	SDL_Renderer* renderer;
 	if (!init(&window, &renderer))
 		return -1;
 
 	Uint32 ticksCount;
 	ticksCount = SDL_GetTicks();
-
 	loadMusic();
-	loadImage(renderer, &ballTexture, "images/ball1.png");
+	loadImage(renderer, "images/ball1.png", &ballTexture);
 	initRandom();
 	initBrickTextures(renderer);
-	initBrickRows();
 	initVariables(renderer);
-	initBrickLives(); 
-	initBrickImageType();
+	loadBackgroundImages(renderer);
 	writeGameMenu(renderer);
 	writePauseMenu(renderer);
 	writeAllCommands(renderer);
@@ -38,10 +37,9 @@ int main(int argc, char* args[]) {
 	loadBackgroundImage(renderer);
 	initCapsules(1 + rand() % totalRectangles, totalRectangles);
 	Mix_PlayMusic(music, -1);
-
 	while (!gameOver) {
 
-		int fps = 60;
+		int fps = 120;
 		while (!SDL_TICKS_PASSED(SDL_GetTicks(), ticksCount + (1000 / fps)))
 			;
 
@@ -58,18 +56,17 @@ int main(int argc, char* args[]) {
 				update(renderer, deltaTime);
 			}
 			else {
-				start(deltaTime);
-				countStart(renderer);
+				start(deltaTime, renderer);
 				updatePaddle(deltaTime);
 			}
-			detectGameKey(renderer, actualFPS);
+			detectGameKey(renderer, actualFPS, window);
 		}
 		else {
-			detectPauseKey(renderer, actualFPS);
+			detectPauseKey(renderer, actualFPS, window);
 		}
 		show(renderer);
-		if(fpsActive)
-			writeFPSText(renderer, actualFPS);
+		if (fpsActive)
+			generateTextTexture({ 36,144,98 }, "fonts/OpenSans-Bold.ttf", fpsTextRect.h, std::to_string(fps), &fpsText, &fpsTextRect, renderer);
 	}
 	close(window, renderer);
 	return 0;

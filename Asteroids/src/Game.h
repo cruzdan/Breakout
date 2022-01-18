@@ -20,7 +20,7 @@ private:
 	void show();
 	void update(float deltaTime);
 	void collisionBulletAsteroids();
-	void collisionShipAsteroids(SDL_Renderer* renderer, SDL_Rect ship);
+	void collisionShipAsteroids(SDL_Renderer* renderer, int x, int y, int w, int h);
 	void setTimerAsteroids(float deltaTime);
 	void checkNewAsteroid(float deltaTime);
 	void restartAsteroids();
