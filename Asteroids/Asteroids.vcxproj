@@ -105,7 +105,9 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)</Command>
+      <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\ttf $(OutDir)\ttf\ /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -127,7 +129,9 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)</Command>
+      <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\ttf $(OutDir)\ttf\ /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -145,7 +149,9 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)</Command>
+      <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\ttf $(OutDir)\ttf\ /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -167,7 +173,9 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)</Command>
+      <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\ttf $(OutDir)\ttf\ /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

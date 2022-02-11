@@ -106,7 +106,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
-</Command>
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\fonts $(OutDir)\fonts\ /S
+xcopy /y /d $(ProjectDir)\sounds $(OutDir)\sounds\ /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,7 +131,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
-</Command>
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\fonts $(OutDir)\fonts\ /S
+xcopy /y /d $(ProjectDir)\sounds $(OutDir)\sounds\ /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -148,7 +152,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
-</Command>
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\fonts $(OutDir)\fonts\ /S
+xcopy /y /d $(ProjectDir)\sounds $(OutDir)\sounds\ /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -171,7 +177,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
-</Command>
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\fonts $(OutDir)\fonts\ /S
+xcopy /y /d $(ProjectDir)\sounds $(OutDir)\sounds\ /S</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

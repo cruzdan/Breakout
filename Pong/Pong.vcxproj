@@ -131,6 +131,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
+xcopy /y /d $(ProjectDir)\fonts $(OutDir)\fonts\ /S
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\sounds $(OutDir)\sounds\ /S
 
 </Command>
     </PostBuildEvent>
@@ -155,6 +158,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
+xcopy /y /d $(ProjectDir)\fonts $(OutDir)\fonts\ /S
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\sounds $(OutDir)\sounds\ /S
 
 </Command>
     </PostBuildEvent>
@@ -175,6 +181,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
+xcopy /y /d $(ProjectDir)\fonts $(OutDir)\fonts\ /S
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\sounds $(OutDir)\sounds\ /S
 
 </Command>
     </PostBuildEvent>
@@ -199,6 +208,9 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y /d $(ProjectDir)\..\thirdparty\SDL\lib\x64\*.dll $(OutDir)
+xcopy /y /d $(ProjectDir)\fonts $(OutDir)\fonts\ /S
+xcopy /y /d $(ProjectDir)\images $(OutDir)\images\ /S
+xcopy /y /d $(ProjectDir)\sounds $(OutDir)\sounds\ /S
 
 </Command>
     </PostBuildEvent>
